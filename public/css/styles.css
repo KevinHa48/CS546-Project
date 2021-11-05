@@ -1,0 +1,66 @@
+header ul {
+    list-style-type: none;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+header li {
+    display: inline;
+    padding: 14px 16px;
+}
+
+header li a{
+    text-decoration: none;
+}
+
+header{
+    background-color: #6FDD8E;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.line{
+    background-color: black;
+    height: 5px;
+    width: 100%;
+}
+
+.buyNow{
+    width: 382px;
+    height: 61px;
+    background: #6FDD8E;
+}
+
+.description{
+    width: 685px;
+    height: 99px;
+    background: #6FDD8E;
+}
+
+.desc-text{
+    font-size: 14px;
+    margin-top: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-bottom: 2%;
+}
+
+.black-desc{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 696px;
+    height: 109px;
+    background: #000000;
+}
+
+body{
+    text-align: center;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
