@@ -56,6 +56,14 @@ header{
     background: #000000;
 }
 
+.logo{
+    position: absolute;
+    left: 0;
+    top: 0;
+    height:50px;
+    width:auto
+}
+
 body{
     text-align: center;
 }
