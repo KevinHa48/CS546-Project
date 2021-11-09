@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/KevinHa48/CS546-Project#readme",
   "dependencies": {
+    "blueimp-md5": "^2.19.0",
     "express": "^4.17.1",
     "express-handlebars": "^5.3.4",
-    "handlebars": "^4.7.7"
+    "handlebars": "^4.7.7",
+    "mongodb": "^4.1.4"
   }
 }
