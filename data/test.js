@@ -4,11 +4,9 @@ const users = require('./users')
 const connection = require('../config/mongoConnection')
 
 const main = async () => {
-    let id;
     try {
         const user = await users.create('Marcus', 'Zebrowski', 'mzebrows@stevens.edu',
                                         21, 'mzebrows', 'password')
-        id = user._id
         console.log(user)
     } catch (e) {
         console.log(e)
@@ -22,7 +20,8 @@ const main = async () => {
     }
 
     try {
-        const user = await users.get('abcd1231')
+        const id = '618a8125cc8852153fe59da1'
+        const user = await users.addBalance(id, 100000)
         console.log(user)
     } catch (e) {
         console.log(e)
