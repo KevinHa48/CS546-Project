@@ -64,15 +64,58 @@ header{
     width:auto
 }
 
-.tradingview-widget {
-    
+/* Wallet CSS starts here */ 
+
+#wallet-greeting {
+    margin-top: 75px;
 }
+
+.tradingview-widget {
+    float: left;
+    display: inline;
+    width: 45%;
+    margin-left: 10%;
+    padding-top: 2.5%;
+}
+
+.sidebar {
+    float: left;
+    display: inline;
+    height: 100%;
+    border-style: solid;
+    border-color:#E3E9ED;
+    width: 450px;
+    z-index: 1;
+    overflow-x: hidden;
+    padding-top: 30px;
+    margin-top: 50px;
+}
+
+.summary {
+    text-align: left;
+    padding: 20px;
+    margin: 0 auto;
+    width: 600px;
+    border-spacing: 0 8px;
+}
+
+.sb-headers {
+    text-align: left;
+    padding: 8px 8px 10px 20px;
+}
+
+.share-logo {
+    width: 5%;
+}
+
+/* Wallet CSS ends here */ 
 
 body{
     text-align: center;
 }
 
 * {
+    font-family: 'Nanum Gothic', sans-serif;
     padding: 0;
     margin: 0;
 }
