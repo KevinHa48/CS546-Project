@@ -280,11 +280,70 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     return result
 }
 
+const addBalance = async (id, amt) => {
+    /* add to the balance of a user. */
+    const _id = getObjectId(id)
+    if (typeof amt !== 'number' || amt <= 0) {
+        throw 'Added amount must be a number greater than 0.'
+    }
+    const collection = await users()
+    const updateInfo = await collection.updateOne({_id}, {$inc: {'wallet.balance': amt}})
+    if (updateInfo.matchedCount === 0) {
+        throw 'User not found with the provided id.'
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw 'Failed to update balance for user.'
+    }
+    const user = await get(id)
+    return user
+}
+
+const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
+    /* this will add a stock transaction to the transactions array for the user.
+       the only difference is that this subdocument will include a shares key.
+       this will also update holdings (e.g. they buy a new stock or they sell out of
+       one completely) as well as balance. as a side note: another function. */
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    if (!(datetime instanceof Date)) {
+        throw 'Must provide a valid Date object.'
+    }
+    if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
+        throw 'Position must be either "buy" or "sell".'
+    }
+    if (typeof price !== 'number' || price <= 0) {
+        throw 'Price must be a number greater than 0.'
+    }
+    if (typeof shares !== 'number' || shares <= 0) {
+        throw 'Shares must be a number greater than 0.'
+    }
+    const user = await get(userId)
+    if (pos == 'buy' && price * shares > user.wallet.balance) {
+        throw 'User does not have enough money to make this transaction.'
+    }
+    const transaction = {
+        _id: new ObjectId(),
+        datetime,
+        itemId,
+        price,
+        shares,
+        pos
+    }
+    const collection = await users()
+    const updateInfo = await collection.updateOne({_id: _userId}, {})
+    return
+}
+
+const addSongTransaction = (userId, datetime, songId, price) => {
+
+}
+
 module.exports = {
     userExists,
     get,
     create,
     getNumberOfShares,
+    addTransaction,
     addBalance,
     addStockTransaction,
     addSongTransaction
