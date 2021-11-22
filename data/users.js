@@ -1,7 +1,6 @@
 const {users} = require('../config/mongoCollection')
 const {ObjectId} = require('mongodb')
 const bcrypt = require('bcryptjs')
-
 const saltRounds = 16
 
 const validEmail = email => {
@@ -49,6 +48,10 @@ const userExists = async username => {
     if (typeof username !== 'string' || username.trim().length < 4) {
         throw 'Provided username must be at least 4 characters long.'
     }
+    if (username.match('[^A-Za-z0-9]+')) {
+        throw 'Username can only contain alphanumeric characters.'
+    }
+    username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
     return !!user
@@ -105,8 +108,8 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (typeof password !== 'string' || password.trim().length < 8) {
         throw 'Password must be at least 8 characters long.'
     }
-    if (password.match('[^A-Za-z0-9]+')) {
-        throw 'Password must consist of alphanumeric characters only.'
+    if (password.match('[ ]+')) {
+        throw 'Password cannot contain spaces.'
     }
     const hash = await bcrypt.hash(password, saltRounds)
     const collection = await users()
@@ -115,7 +118,7 @@ const create = async (firstName, lastName, email, age, username, password) => {
         lastName,
         age,
         email,
-        username,
+        username: username.toLowerCase(),
         password: hash,
         wallet: {
             holdings: {
