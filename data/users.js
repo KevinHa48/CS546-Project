@@ -1,30 +1,30 @@
 const {users} = require('../config/mongoCollection')
 const {ObjectId} = require('mongodb')
+const bcrypt = require('bcryptjs')
+
+const saltRounds = 16
 
 const validEmail = email => {
     // more thorough type checking for emails.
     if (typeof email !== 'string') {
         return false
     }
-    let username, website, domain, tld
-    const emailComponents = email.split('@')
-    if (emailComponents.length !== 2) {
+    const [username, website] = email.split('@')
+    if (!username || !website) {
         return false
     }
-    username = emailComponents[0]
-    website = emailComponents[1]
-
-    const websiteComponents = website.split('.')
-    if (websiteComponents.length !== 2) {
+    const [domain, tld] = website.split('.')
+    if (!domain || !tld) {
         return false
     }
-    domain = websiteComponents[0]
-    tld = websiteComponents[1]
-
-    for (str of [username, website, domain, tld]) {
-        if (str.trim().length === 0) {
-            return false
-        }
+    if (username.length === 0 || username.match('[^A-Za-z0-9\.]+')) {
+        return false
+    }
+    if (domain.length === 0 || domain.match('[^A-Za-z0-9\-]+')) {
+        return false
+    }
+    if (tld.length === 0 || tld.match('[^A-Za-z0-9\-]+')) {
+        return false
     }
     return true
 }
@@ -95,6 +95,9 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (typeof username !== 'string' || username.trim().length < 4) {
         throw 'Username must be at least 4 characters long.'
     }
+    if (username.match('[^A-Za-z0-9]+')) {
+        throw 'Username must only consist of alphanumeric characters only.'
+    }
     const bool = await userExists(username)
     if (bool) {
         throw 'Provided username is unavailable.'
@@ -102,13 +105,18 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (typeof password !== 'string' || password.trim().length < 8) {
         throw 'Password must be at least 8 characters long.'
     }
-    const user = {
+    if (password.match('[^A-Za-z0-9]+')) {
+        throw 'Password must consist of alphanumeric characters only.'
+    }
+    const hash = await bcrypt.hash(password, saltRounds)
+    const collection = await users()
+    const {insertedId} = await collection.insertOne({
         firstName,
         lastName,
         age,
         email,
         username,
-        password,
+        password: hash,
         wallet: {
             holdings: {
                 stocks: [],
@@ -118,9 +126,7 @@ const create = async (firstName, lastName, email, age, username, password) => {
             portfolioValues: [],
             transactions: []
         }
-    }
-    const collection = await users()
-    const {insertedId} = await collection.insertOne(user)
+    })
     const result = await get(insertedId.toString())
     return result
 }
