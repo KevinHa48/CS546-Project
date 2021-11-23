@@ -1,30 +1,29 @@
 const {users} = require('../config/mongoCollection')
 const {ObjectId} = require('mongodb')
+const bcrypt = require('bcryptjs')
+const saltRounds = 16
 
 const validEmail = email => {
-    /* more thorough type checking for emails. */
+    // more thorough type checking for emails.
     if (typeof email !== 'string') {
         return false
     }
-    let username, website, domain, tld
-    const emailComponents = email.split('@')
-    if (emailComponents.length !== 2) {
+    const [username, website] = email.split('@')
+    if (!username || !website) {
         return false
     }
-    username = emailComponents[0]
-    website = emailComponents[1]
-
-    const websiteComponents = website.split('.')
-    if (websiteComponents.length !== 2) {
+    const [domain, tld] = website.split('.')
+    if (!domain || !tld) {
         return false
     }
-    domain = websiteComponents[0]
-    tld = websiteComponents[1]
-
-    for (str of [username, website, domain, tld]) {
-        if (str.trim().length === 0) {
-            return false
-        }
+    if (username.length === 0 || username.match('[^A-Za-z0-9\.]+')) {
+        return false
+    }
+    if (domain.length === 0 || domain.match('[^A-Za-z0-9\-]+')) {
+        return false
+    }
+    if (tld.length === 0 || tld.match('[^A-Za-z0-9\-]+')) {
+        return false
     }
     return true
 }
@@ -49,20 +48,35 @@ const userExists = async username => {
     if (typeof username !== 'string' || username.trim().length < 4) {
         throw 'Provided username must be at least 4 characters long.'
     }
+    if (username.match('[^A-Za-z0-9]+')) {
+        throw 'Username can only contain alphanumeric characters.'
+    }
+    username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
     return !!user
 }
 
 const get = async id => {
-    /* return document of user with provided id. */
+    // return document of user with provided id.
     const _id = getObjectId(id)
     const collection = await users()
     let user = await collection.findOne({_id})
     if (!user) {
         throw 'No user was found with the provided id.'
     }
+    // displaying all the ObjectIds as strings.
     user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -84,6 +98,9 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (typeof username !== 'string' || username.trim().length < 4) {
         throw 'Username must be at least 4 characters long.'
     }
+    if (username.match('[^A-Za-z0-9]+')) {
+        throw 'Username must only consist of alphanumeric characters only.'
+    }
     const bool = await userExists(username)
     if (bool) {
         throw 'Provided username is unavailable.'
@@ -91,13 +108,18 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (typeof password !== 'string' || password.trim().length < 8) {
         throw 'Password must be at least 8 characters long.'
     }
-    const user = {
+    if (password.match('[ ]+')) {
+        throw 'Password cannot contain spaces.'
+    }
+    const hash = await bcrypt.hash(password, saltRounds)
+    const collection = await users()
+    const {insertedId} = await collection.insertOne({
         firstName,
         lastName,
         age,
         email,
-        username,
-        password,
+        username: username.toLowerCase(),
+        password: hash,
         wallet: {
             holdings: {
                 stocks: [],
@@ -107,16 +129,13 @@ const create = async (firstName, lastName, email, age, username, password) => {
             portfolioValues: [],
             transactions: []
         }
-    }
-    const collection = await users()
-    let {insertedId} = await collection.insertOne(user)
-    insertedId = insertedId.toString()
-    const result = await get(insertedId)
+    })
+    const result = await get(insertedId.toString())
     return result
 }
 
 const addBalance = async (id, amt) => {
-    /* add to the balance of a user. */
+    // add to the balance of a user.
     const _id = getObjectId(id)
     if (typeof amt !== 'number' || amt <= 0) {
         throw 'Added amount must be a number greater than 0.'
@@ -133,6 +152,16 @@ const addBalance = async (id, amt) => {
     return user
 }
 
+const getNumberOfShares = async (userId, stockId) => {
+    // calculates the total number of shares a user has of a particular stock.
+    const user = await get(userId)
+    const {transactions} = user.wallet
+    return transactions
+        .filter(transaction => transaction._itemId === stockId)
+        .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
+        .reduce((a, b) => a + b, 0)
+}
+
 const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
     /* this will add a stock transaction to the transactions array for the user.
        the only difference is that this subdocument will include a shares key.
@@ -144,7 +173,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
         throw 'Must provide a valid Date object.'
     }
     if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
-        throw 'Position must be either "buy" or "sell".'
+        throw 'Pos must either be "buy" or "sell".'
     }
     if (typeof price !== 'number' || price <= 0) {
         throw 'Price must be a number greater than 0.'
@@ -153,31 +182,109 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
         throw 'Shares must be a number greater than 0.'
     }
     const user = await get(userId)
-    if (pos == 'buy' && price * shares > user.wallet.balance) {
+    if (price * shares > user.wallet.balance) {
         throw 'User does not have enough money to make this transaction.'
+    }
+    const oldShareAmount = await getNumberOfShares(userId, stockId)
+    const newShareAmount = oldShareAmount + shares
+    if (newShareAmount < 0) {
+        throw 'User cannot sell more shares than they own.'
     }
     const transaction = {
         _id: new ObjectId(),
         datetime,
-        itemId,
+        _itemId: _stockId,
         price,
         shares,
         pos
     }
     const collection = await users()
-    const updateInfo = await collection.updateOne({_id: _userId}, {})
-    return
+    let updateInfo = await collection.updateOne({_id: _userId}, {
+        $push: {'wallet.transactions': transaction},
+        $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
+    })
+    if (updateInfo.matchedCount === 0) {
+        throw 'Could not find user with the provided id.'
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw 'Failed to update user transactions history and balance after transaction.'
+    }
+    if (oldShareAmount === 0) {
+        updateInfo = await collection.updateOne({_id: _userId}, {$push: {'wallet.holdings.stocks': _stockId}})
+    } else if (newShareAmount === 0) {
+        updateInfo = await collection.updateOne({_id: _userId}, {$pull: {'wallet.holdings.stocks': _stockId}})
+    }
+    if (updateInfo.matchedCount === 0) {
+        throw 'Could not find user with the provided id.'
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw 'Failed to update user holdings after transaction.'
+    }
+    const result = await get(userId)
+    return result
 }
 
-const addSongTransaction = (userId, datetime, songId, price) => {
-
+const addSongTransaction = async (userId, datetime, songId, pos, price) => {
+    /* this will add a stock transaction to the transactions array for the user.
+       the only difference is that this subdocument will include a shares key.
+       this will also update holdings (e.g. they buy a new stock or they sell out of
+       one completely) as well as balance. as a side note: another function. */
+    const _userId = getObjectId(userId)
+    const _songId = getObjectId(songId)
+    if (!(datetime instanceof Date)) {
+        throw 'Must provide a valid Date object.'
+    }
+    if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
+        throw 'Position must either be "buy" or "sell".'
+    }
+    if (typeof price !== 'number' || price <= 0) {
+        throw 'Price must be a number greater than 0.'
+    }
+    const transaction = {
+        _id: new ObjectId(),
+        datetime,
+        _itemId: _songId,
+        price,
+        pos
+    }
+    const collection = await users()
+    let updateInfo = await collection.updateOne({_id: _userId}, {
+        $push: {'wallet.transactions': transaction},
+        $inc: {'wallet.balance': price * (pos === 'buy' ? -1 : 1)},
+    })
+    if (updateInfo.matchedCount === 0) {
+        throw 'Could not find user with the provided id.'
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw 'Failed to update user transactions history and balance after transaction.'
+    }
+    const user = await get(userId)
+    if (pos === 'buy' && user.wallet.balance < price) {
+        throw 'User cannot afford to buy the rights to this music.'
+    }
+    if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
+        throw 'User does not own the rights to the music that they are trying to sell.'
+    }
+    if (pos === 'buy') {
+        updateInfo = await collection.updateOne({_id: _userId}, {$push: {'wallet.holdings.songs': _songId}})
+    } else {
+        updateInfo = await collection.updateOne({_id: _userId}, {$pull: {'wallet.holdings.songs': _songId}})
+    }
+    if (updateInfo.matchedCount === 0) {
+        throw 'Could not find user with the provided id.'
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw 'Failed to update user holdings after transaction.'
+    }
+    const result = await get(userId)
+    return result
 }
 
 module.exports = {
     userExists,
     get,
     create,
-    addTransaction,
+    getNumberOfShares,
     addBalance,
     addStockTransaction,
     addSongTransaction
