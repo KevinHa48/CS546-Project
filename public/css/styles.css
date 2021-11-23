@@ -64,11 +64,91 @@ header{
     width:auto
 }
 
+/* Wallet CSS starts here */ 
+
+#wallet-greeting {
+    margin-top: 75px;
+    margin-bottom: 75px;
+}
+
+.tradingview-widget {
+    width: 800px;
+    height: 450px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: 50%;
+    margin: 0 auto;
+}
+
+.sidebar {
+    border-style: solid;
+    border-color:#E3E9ED;
+    width: 400px;
+    overflow-x: hidden;
+    padding-top: 30px;
+    /* margin-top: 50px; */
+}
+
+.summary {
+    text-align: left;
+    padding: 20px;
+    margin: 0 auto;
+    width: 530px;
+    border-spacing: 0 8px;
+}
+
+.stock-summary {
+    text-align: left;
+    padding: 0 20px 0 20px;
+    width: 450px;
+    border-spacing: 0 30px;
+}
+
+.sb-headers {
+    text-align: left;
+    padding: 8px 8px 10px 20px;
+}
+
+.share-logo {
+    width: 10%;
+}
+
+
+.owned-songs h1 {
+    margin-top: 5%;
+    padding: 20px;
+    
+}
+
+.dividers {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.covers {
+    width: 175px;
+}
+
+.change {
+    color:red
+}
+
+.song-carousel {
+    margin: 50px auto;
+    table-layout: auto;
+    width: 40%;
+}
+/* Wallet CSS ends here */ 
+
 body{
     text-align: center;
 }
 
 * {
+    font-family: 'Nanum Gothic', sans-serif;
     padding: 0;
     margin: 0;
 }
