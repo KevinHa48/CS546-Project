@@ -68,6 +68,11 @@ body {
     text-align: center;
 }
 
+h2 {
+    margin-top: 4%;
+    color: #6fdd8e;
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -118,4 +123,8 @@ th {
 .clickable-row:hover {
     cursor: pointer;
     background-color: rgb(136, 136, 115);
+}
+
+.buy-songs {
+    margin-top: 3%;
 }
