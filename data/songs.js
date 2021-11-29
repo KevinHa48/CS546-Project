@@ -48,6 +48,14 @@ async function get(searchId) {
     return songFound;
 }
 
+async function getAll() {
+    const songsCollection = await songs();
+    const songsList = await songsCollection.find({}).toArray();
+    if (songsList.length === 0) {
+        return [];
+    }
+    return songsList;
+}
 function validateCreations(
     name,
     artist,
@@ -115,4 +123,4 @@ async function create(
     return songDetails;
 }
 
-module.exports = {create, get};
+module.exports = {create, get, getAll};

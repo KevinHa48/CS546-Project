@@ -2,44 +2,44 @@ header ul {
     list-style-type: none;
     padding: 0;
     overflow: hidden;
-  }
-  
+}
+
 header li {
     display: inline;
     padding: 14px 16px;
 }
 
-header li a{
+header li a {
     text-decoration: none;
 }
 
-header{
-    background-color: #6FDD8E;
+header {
+    background-color: #6fdd8e;
     height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.line{
+.line {
     background-color: black;
     height: 5px;
     width: 100%;
 }
 
-.buyNow{
+.buyNow {
     width: 382px;
     height: 61px;
-    background: #6FDD8E;
+    background: #6fdd8e;
 }
 
-.description{
+.description {
     width: 685px;
     height: 99px;
-    background: #6FDD8E;
+    background: #6fdd8e;
 }
 
-.desc-text{
+.desc-text {
     font-size: 14px;
     margin-top: 2%;
     margin-left: 2%;
@@ -47,7 +47,7 @@ header{
     margin-bottom: 2%;
 }
 
-.black-desc{
+.black-desc {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,19 +56,66 @@ header{
     background: #000000;
 }
 
-.logo{
+.logo {
     position: absolute;
     left: 0;
     top: 0;
-    height:50px;
-    width:auto
+    height: 50px;
+    width: auto;
 }
 
-body{
+body {
     text-align: center;
 }
 
 * {
     padding: 0;
     margin: 0;
+}
+
+.table-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2%;
+    border-radius: 3px;
+    border-spacing: 0px;
+}
+
+.table-details {
+    table-layout: fixed;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin-top: 6%;
+    border-radius: 4px;
+    border-spacing: 0px;
+}
+
+td,
+th {
+    text-align: left;
+    padding: 4px;
+    border-bottom: 1px solid #090a07;
+    border-left: 1px;
+    border-right: 1px;
+}
+
+.left-column {
+    width: 20%;
+    align-content: left;
+    /* background-color: #c4d8c4; */
+    background-color: rgb(185, 185, 170);
+}
+
+.right-column {
+    align-content: left;
+    background-color: #dddddd;
+}
+
+.clickable-row:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.clickable-row:hover {
+    cursor: pointer;
+    background-color: rgb(136, 136, 115);
 }
