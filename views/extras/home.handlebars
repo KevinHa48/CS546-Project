@@ -14,6 +14,15 @@
     </nav>
 </header>
 <div class="line"></div>
+{{#unless authorized}}
+    <p>
+        {{#if authenticated}}
+            You are already logged in!
+        {{else}}
+            You must be logged in to access that page.
+        {{/if}}
+    </p>
+{{/unless}}
 <div class="home-body">
     <div class="home-top">
         <div class="home-text">
