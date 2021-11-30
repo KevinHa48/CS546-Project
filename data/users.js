@@ -1,3 +1,4 @@
+
 const {users} = require('../config/mongoCollection')
 const {ObjectId} = require('mongodb')
 const bcrypt = require('bcryptjs')
@@ -41,7 +42,7 @@ const getObjectId = id => {
     return _id
 }
 
-const userExists = async username => {
+const getByUsername = async username => {
     /* checking that a user with the provided username does not already exist
        before creating document. Password is optional argument to verify that
        user has that password. It should be hashed when passed in. */
@@ -54,10 +55,10 @@ const userExists = async username => {
     username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
-    return !!user
+    return user
 }
 
-const get = async id => {
+const getById = async id => {
     // return document of user with provided id.
     const _id = getObjectId(id)
     const collection = await users()
@@ -101,8 +102,8 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (username.match('[^A-Za-z0-9]+')) {
         throw 'Username must only consist of alphanumeric characters only.'
     }
-    const bool = await userExists(username)
-    if (bool) {
+    const user = await getByUsername(username)
+    if (user) {
         throw 'Provided username is unavailable.'
     }
     if (typeof password !== 'string' || password.trim().length < 8) {
@@ -130,7 +131,7 @@ const create = async (firstName, lastName, email, age, username, password) => {
             transactions: []
         }
     })
-    const result = await get(insertedId.toString())
+    const result = await getById(insertedId.toString())
     return result
 }
 
@@ -281,8 +282,9 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
 }
 
 module.exports = {
-    userExists,
-    get,
+    validEmail,
+    getByUsername,
+    getById,
     create,
     getNumberOfShares,
     addBalance,
