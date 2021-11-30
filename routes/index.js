@@ -1,14 +1,23 @@
 const marketRoutes = require("./market");
 const walletRoutes = require("./wallet");
 const musicRoutes = require("./songs");
+const industryRoutes = require("./industry");
+const stockRoutes = require("./stock");
+const userRoutes = require("./users");
 const path = require("path");
 
 const constructorMethod = (app) => {
+    app.use("/users", userRoutes);
     app.use("/market", marketRoutes);
     app.use("/songs", musicRoutes);
     app.use("/wallet", walletRoutes);
+    app.use("/industries", industryRoutes);
+    app.use("/stock", stockRoutes);
     app.get("/", (req, res) => {
-        res.sendFile(path.resolve("static/home.html"));
+        res.render("extras/home", {
+            authenticated: !!req.session.user,
+            title: "Beats and Blockchain",
+        });
     });
 
     app.use("*", (req, res) => {
