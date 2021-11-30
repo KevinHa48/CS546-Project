@@ -6,7 +6,7 @@ router.get('/login', async (req, res) => {
     if (req.session.user) {
         res.redirect('/')
     } else {
-        res.render('login', {title: 'Log In'})
+        res.render('extras/login', {title: 'Log In'})
     }
 })
 
@@ -21,19 +21,19 @@ router.post('/login', async (req, res) => {
         errors.push('Password must be at least 8 characters long and cannot contain spaces.')
     }
     if (errors.length > 0) {
-        res.status(400).render('login', {errors, title})
+        res.status(400).render('extras/login', {errors, title})
         return
     }
     username = username.toLowerCase()
     const user = await users.getByUsername(username)
     errors = ['Either username or password is incorrect.']
     if (!user) {
-        res.status(400).render('login', {errors, title})
+        res.status(400).render('extras/login', {errors, title})
         return
     }
     const correctPassword = await bcrypt.compare(password, user.password)
     if (!correctPassword) {
-        res.status(400).render('login', {errors, title})
+        res.status(400).render('extras/login', {errors, title})
         return
     }
     req.session.user = username
@@ -44,7 +44,7 @@ router.get('/signup', async (req, res) => {
     if (req.session.user) {
         res.redirect('/')
     } else {
-        res.render('signup', {title: 'Sign Up', errors: []})
+        res.render('extras/signup', {title: 'Sign Up', errors: []})
     }
 })
 
@@ -75,18 +75,18 @@ router.post('/signup', async (req, res) => {
         errors.push('The passwords do not match.')
     }
     if (errors.length > 0) {
-        res.status(400).render('signup', {errors, title})
+        res.status(400).render('extras/signup', {errors, title})
         return
     }
     const user = await users.getByUsername(username)
     if (user) {
-        res.status(400).render('signup', {errors: ['Provided username is unavailable'], title})
+        res.status(400).render('extras/signup', {errors: ['Provided username is unavailable'], title})
         return
     }
     try {
         await users.create(firstName, lastName, email, age, username, password)
     } catch (e) {
-        res.status(500).render('signup', {errors: ['Internal Server Error'], title})    
+        res.status(500).render('extras/signup', {errors: ['Internal Server Error'], title})    
         return
     }
     res.redirect('/users/login')

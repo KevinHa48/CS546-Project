@@ -23,14 +23,14 @@ app.use(session({
 
 app.use('/users', async (req, res, next) => {
     if (req.method === 'GET' && req.session.user) {
-        res.redirect('/')
+        return res.redirect('/')
     }
     next()
 })
 
 app.use('/wallet', async (req, res, next) => {
     if (!req.session.user) {
-        res.redirect('/users/login')
+        return res.redirect('/users/login')
     }
     next()
 })
@@ -48,4 +48,3 @@ app.listen(3000, () => {
     console.log("We've now got a server!");
     console.log('Your routes will be running on http://localhost:3000');
 });
-
