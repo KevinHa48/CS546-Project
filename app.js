@@ -4,6 +4,7 @@ const static = express.static(__dirname + '/public');
 
 const configRoutes = require('./routes');
 const exphbs = require('express-handlebars');
+const session = require('express-session')
 
 app.use('/public', static);
 app.use(express.json());
@@ -11,6 +12,35 @@ app.use(express.urlencoded({ extended: true }));
 
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
+
+app.use(session({
+    name: "AuthCookie",
+    secret: "some secret string!",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {maxAge: 30000}
+}))
+
+app.use('/users', async (req, res, next) => {
+    if (req.method === 'GET' && req.session.user) {
+        res.redirect('/')
+    }
+    next()
+})
+
+app.use('/wallet', async (req, res, next) => {
+    if (!req.session.user) {
+        res.redirect('/users/login')
+    }
+    next()
+})
+
+// app.use('/market', async (req, res, next) => {
+//     if (!req.session.user) {
+//         res.redirect('/users/login')
+//     }
+//     next()
+// })
 
 configRoutes(app);
 

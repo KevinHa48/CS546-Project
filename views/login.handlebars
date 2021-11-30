@@ -1,0 +1,21 @@
+<h1>Log In</h1>
+{{#if errors.length}}
+    <h2>Errors:</h2>
+    <ul>
+        {{#errors}}
+            <li>{{this}}</li>
+        {{/errors}}
+    </ul>
+{{/if}}
+<form method="POST" action="/users/login">
+    <label>
+        Username:
+        <input type="text" name="username">
+    </label>
+    <label>
+        Password:
+        <input type="password" name="password">
+    </label>
+    <input type="submit" value="Log In">
+</form>
+<a href="/users/signup">Don't have an account? Sign up here.</a>
