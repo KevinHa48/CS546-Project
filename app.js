@@ -29,12 +29,8 @@ app.use('/', async (req, res, next) => {
         return
     }
 
-    if (!loggedIn && (routePath[1] !== 'users' && routePath[1] !== '')) {
-        // alert('You must be logged in to access that page.')
-        res.redirect('/users/login')
-    } else if (loggedIn && routePath[1] === 'users' && routePath[2] !== 'logout') {
-        // alert('You are already logged in.')
-        res.redirect('/')
+    if ((!loggedIn && (routePath[1] !== 'users' && routePath[1] !== '')) || (loggedIn && routePath[1] === 'users' && routePath[2] !== 'logout')) {
+        res.status(403).render('extras/home', {title: 'Beats and Blockchain', authenticated: loggedIn, authorized: false})
     } else {
         next()
     }

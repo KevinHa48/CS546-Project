@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const users = require('../data/users.js')
 const bcrypt = require('bcryptjs')
+const xss = require('xss')
 
 router.get('/login', async (req, res) => {
     if (req.session.user) {
@@ -12,7 +13,8 @@ router.get('/login', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const title = 'Log In'
-    let {username, password} = req.body
+    let username = xss(req.body.username)
+    let password = xss(req.body.password)
     let errors = []
     if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
         errors.push('Username must be at least 4 characters long and can only contain letters and numbers.')
@@ -50,7 +52,13 @@ router.get('/signup', async (req, res) => {
 
 router.post('/signup', async (req, res) => {
     const title = 'Sign Up'
-    let {firstName, lastName, age, email, username, password, passwordCopy} = req.body
+    let firstName = xss(req.body.firstName)
+    let lastName = xss(req.body.lastName)
+    let age = xss(req.body.age)
+    let email = xss(req.body.email)
+    let username = xss(req.body.username)
+    let password = xss(req.body.password)
+    let passwordCopy = xss(req.body.passwordCopy)
     let errors = []
     if (typeof firstName !== 'string' || firstName.trim().length === 0 || firstName.match('[^A-Za-z]+')) {
         errors.push('First name can only contain letters.')
