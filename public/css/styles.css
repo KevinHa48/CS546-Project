@@ -113,6 +113,20 @@ header {
 }
 /* Wallet CSS ends here */
 
+/* Login/Signup CSS starts here */
+
+.login-and-signup > label {
+    display: block;
+    margin: 10px;
+}
+
+.login-and-signup > [type="submit"] {
+    background: #6FDD8E;
+    padding: 5px;
+}
+
+/* Login/Signup CSS ends here */
+
 body {
     text-align: center;
 }

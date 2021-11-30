@@ -15,7 +15,7 @@ const constructorMethod = (app) => {
     app.use('/industries', industryRoutes);
     app.use('/stock', stockRoutes);
     app.get('/', (req, res) => {
-        res.render('extras/home',{authenticated: !!req.session.user, title: 'Beats and Blockchain'})
+        res.render('extras/home', {authenticated: !!req.session.user, title: 'Beats and Blockchain'})
     });
 
     app.use("*", (req, res) => {

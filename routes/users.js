@@ -52,11 +52,11 @@ router.post('/signup', async (req, res) => {
     const title = 'Sign Up'
     let {firstName, lastName, age, email, username, password, passwordCopy} = req.body
     let errors = []
-    if (typeof firstName !== 'string' || firstName.trim().length === 0) {
-        errors.push('First name cannot be blank.')
+    if (typeof firstName !== 'string' || firstName.trim().length === 0 || firstName.match('[^A-Za-z]+')) {
+        errors.push('First name can only contain letters.')
     }
-    if (typeof lastName !== 'string' || lastName.trim().length === 0) {
-        errors.push('Last name cannot be blank.')
+    if (typeof lastName !== 'string' || lastName.trim().length === 0 || lastName.match('[^A-Za-z]+')) {
+        errors.push('Last name can only contain letters.')
     }
     age = parseInt(age)
     if (typeof age !== 'number' || age < 18) {
@@ -75,18 +75,49 @@ router.post('/signup', async (req, res) => {
         errors.push('The passwords do not match.')
     }
     if (errors.length > 0) {
-        res.status(400).render('extras/signup', {errors, title})
+        res.status(400).render('extras/signup', {
+            errors,
+            title,
+            firstName,
+            lastName,
+            email,
+            age,
+            username
+        })
         return
     }
-    const user = await users.getByUsername(username)
+    let user = await users.getByUsername(username)
     if (user) {
-        res.status(400).render('extras/signup', {errors: ['Provided username is unavailable'], title})
+        errors.push('Provided username is unavailable.')
+    }
+    user = await users.getByEmail(email)
+    if (user) {
+        errors.push('Provided email is unavailable.')
+    }
+    if (errors.length > 0) {
+        res.status(400).render('extras/signup', {
+            errors,
+            title,
+            firstName,
+            lastName,
+            email,
+            age,
+            username
+        })
         return
     }
     try {
         await users.create(firstName, lastName, email, age, username, password)
     } catch (e) {
-        res.status(500).render('extras/signup', {errors: ['Internal Server Error'], title})    
+        res.status(500).render('extras/signup', {
+            errors: ['Internal Server Error'],
+            title,
+            firstName,
+            lastName,
+            email,
+            age,
+            username
+        })    
         return
     }
     res.redirect('/users/login')
