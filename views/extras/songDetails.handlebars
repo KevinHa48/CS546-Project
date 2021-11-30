@@ -1,30 +1,42 @@
+<header>
+    <nav>
+        <img alt="logo" src="/public/images/Beats_Blockchains.png" class="logo">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/market">Market</a></li>
+            <li><a href="/wallet">Wallet</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+            <li><a href="/login">Log In</a></li>
+        </ul>
+    </nav>
+</header>
 <main>
     <h1>{{songs.name}}</h1>
-    <div class="artist-name">
+    <div class="songs-description">
         <h2>Artist</h2>
         <h3>{{songs.artist}}</h3>
     </div>
-    <div class="price">
+    <div class="songs-description">
         <h2>Price</h2>
         <h3>${{songs.price}}</h3>
     </div>
-    <div class="genre">
+    <div class="songs-description">
         <h2>Genre</h2>
         <h3>{{songs.genre}}</h3>
     </div>
-    <div class="description-song">
+    <div class="songs-description">
         <h2>Description</h2>
         <h3>{{songs.description}}</h3>
     </div>
-    <div class="lastSoldPrice">
+    <div class="songs-description">
         <h2>Last Sold Price</h2>
         <h3>${{songs.lastSoldPrice}}</h3>
     </div>
-    <div class="lastSoldPrice">
+    <div class="songs-description">
         <h2>Number of Tracks</h2>
         <h3>{{songs.numberOfTracks}}</h3>
     </div>
-    <div class="lastSoldPrice">
+    <div class="songs-description">
         <h2>currently Available</h2>
         <h3>{{songs.currentlyAvailable}}</h3>
     </div>
