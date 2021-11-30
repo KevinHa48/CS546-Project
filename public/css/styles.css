@@ -3,26 +3,26 @@ header ul {
     list-style-type: none;
     padding: 0;
     overflow: hidden;
-  }
-  
+}
+
 header li {
     display: inline;
     padding: 14px 16px;
 }
 
-header li a{
+header li a {
     text-decoration: none;
 }
 
-header{
-    background-color: #6FDD8E;
+header {
+    background-color: #6fdd8e;
     height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.line{
+.line {
     background-color: black;
     height: 5px;
     width: 100%;
@@ -36,7 +36,7 @@ header{
     width:auto
 }
 
-/* Wallet CSS starts here */ 
+/* Wallet CSS starts here */
 
 #wallet-greeting {
     margin-top: 75px;
@@ -88,11 +88,9 @@ header{
     width: 10%;
 }
 
-
 .owned-songs h1 {
     margin-top: 5%;
     padding: 20px;
-    
 }
 
 .dividers {
@@ -219,7 +217,7 @@ figure{
     width: 100%;
 }
 
-.black-desc{
+.black-desc {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -227,6 +225,7 @@ figure{
     height: 100%;
     background: #000000;
 }
+
 
 .description{
     margin: 0.5%;
@@ -238,6 +237,57 @@ figure{
     background: #6FDD8E;
 }
 
-.desc-text{
+.desc-text {
     font-size: 14px;
+}
+
+.table-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2%;
+    border-radius: 3px;
+    border-spacing: 0px;
+}
+
+.table-details {
+    table-layout: fixed;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin-top: 6%;
+    border-radius: 4px;
+    border-spacing: 0px;
+}
+
+td,
+th {
+    text-align: left;
+    padding: 4px;
+    border-bottom: 1px solid #090a07;
+    border-left: 1px;
+    border-right: 1px;
+}
+
+.left-column {
+    width: 20%;
+    align-content: left;
+    /* background-color: #c4d8c4; */
+    background-color: rgb(185, 185, 170);
+}
+
+.right-column {
+    align-content: left;
+    background-color: #dddddd;
+}
+
+.clickable-row:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.clickable-row:hover {
+    cursor: pointer;
+    background-color: rgb(136, 136, 115);
+}
+
+.buy-songs {
+    margin-top: 3%;
 }
