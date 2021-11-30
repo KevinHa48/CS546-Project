@@ -14,7 +14,10 @@
             </th>
         </tr>
         {{#each songs}}
-            <tr onclick="window.location='/{{_id}}'" class="clickable-row">
+            <tr
+                onclick="window.location='/songs/{{_id}}'"
+                class="clickable-row"
+            >
                 <td>
                     {{name}}
                 </td>
