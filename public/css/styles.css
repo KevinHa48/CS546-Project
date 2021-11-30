@@ -28,12 +28,12 @@ header {
     width: 100%;
 }
 
-.logo {
+.logo{
     position: absolute;
     left: 0;
     top: 0;
-    height: 50px;
-    width: auto;
+    height:50px;
+    width:auto
 }
 
 /* Wallet CSS starts here */
@@ -57,7 +57,7 @@ header {
 
 .sidebar {
     border-style: solid;
-    border-color: #e3e9ed;
+    border-color:#E3E9ED;
     width: 400px;
     overflow-x: hidden;
     padding-top: 30px;
@@ -103,7 +103,7 @@ header {
 }
 
 .change {
-    color: red;
+    color:red
 }
 
 .song-carousel {
@@ -111,42 +111,42 @@ header {
     table-layout: auto;
     width: 40%;
 }
-/* Wallet CSS ends here */
+/* Wallet CSS ends here */ 
 
-body {
+body{
     text-align: center;
 }
 
 * {
-    font-family: "Nanum Gothic", sans-serif;
+    font-family: 'Nanum Gothic', sans-serif;
     padding: 0;
     margin: 0;
 }
 
-figcaption {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
+figcaption{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
 }
 
-.figures {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
+.figures{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	flex-wrap: wrap;
 }
 
-figure {
-    height: 550px;
-    width: 475px;
-    background-color: white;
-    padding-bottom: 16px;
-    border-radius: 4px;
-    box-shadow: 0px 0px 4px black;
+figure{
+	height:550px;
+	width:475px;
+	background-color: white;
+	padding-bottom: 16px;
+	border-radius: 4px;
+	box-shadow: 0px 0px 4px black;
 }
 
-.buy-now {
+.buy-now{
     font-size: 14px;
     margin-top: 5%;
     margin-left: 5%;
@@ -155,34 +155,34 @@ figure {
 }
 
 /* Home Screen */
-.home-body {
+.home-body{
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
-.home-top {
+.home-top{
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
 }
 
-.buyNow {
+.buyNow{
     width: 100%;
     height: 4em;
-    background: #6fdd8e;
+    background: #6FDD8E;
 }
 
-.home-bottom {
+.home-bottom{
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
-.home-rest {
+.home-rest{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -191,27 +191,27 @@ figure {
     width: 100%;
 }
 
-.quotes {
+.quotes{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 98%;
     height: 90%;
-    margin: 2%;
+    margin: 2%
 }
-.quote1 {
-    background-color: #6fdd8e;
+.quote1{
+    background-color: #6FDD8E;
     height: 100%;
     width: 100%;
 }
-.quote2 {
-    background-color: #6fdd8e;
+.quote2{
+    background-color: #6FDD8E;
     height: 100%;
     width: 100%;
 }
 
-.thin-line {
+.thin-line{
     background-color: black;
     height: 1px;
     width: 100%;
@@ -226,14 +226,15 @@ figure {
     background: #000000;
 }
 
-.description {
+
+.description{
     margin: 0.5%;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 98%;
     height: 50%;
-    background: #6fdd8e;
+    background: #6FDD8E;
 }
 
 .desc-text {
