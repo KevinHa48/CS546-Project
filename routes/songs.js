@@ -1,7 +1,6 @@
 const express = require("express");
 const songsData = require("../data/songs");
 const router = express.Router();
-const {ObjectId} = require("mongodb");
 
 router.get("/", async (req, res) => {
     let songsList = await songsData.getAll();
