@@ -46,15 +46,22 @@ const getByUsername = async username => {
     /* checking that a user with the provided username does not already exist
        before creating document. Password is optional argument to verify that
        user has that password. It should be hashed when passed in. */
-    if (typeof username !== 'string' || username.trim().length < 4) {
-        throw 'Provided username must be at least 4 characters long.'
-    }
-    if (username.match('[^A-Za-z0-9]+')) {
-        throw 'Username can only contain alphanumeric characters.'
+    if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.'
     }
     username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
+    return user
+}
+
+const getByEmail = async email => {
+    if (!validEmail(email)) {
+        throw 'Provided email is invalid.'
+    }
+    email = email.toLowerCase()
+    const collection = await users()
+    const user = collection.findOne({email})
     return user
 }
 
@@ -84,11 +91,11 @@ const getById = async id => {
 const create = async (firstName, lastName, email, age, username, password) => {
     /* this method should run whenever someone creates a new account. password 
        should be hashed when passed in. */
-    if (typeof firstName !== 'string' || firstName.trim().length === 0) {
-        throw 'First name cannot be blank.'
+    if (typeof firstName !== 'string' || firstName.trim().length === 0 || firstName.match('[^A-Za-z]+')) {
+        throw 'First name can only contain letters.'
     }
-    if (typeof lastName !== 'string' || lastName.trim().length === 0) {
-        throw 'Last name cannot be blank.'
+    if (typeof lastName !== 'string' || lastName.trim().length === 0 || lastName.match('[^A-Za-z]+')) {
+        throw 'Last name can only contain letters.'
     }
     if (typeof age !== 'number' || age < 18) {
         throw 'User must be at least 18 years old.'
@@ -96,24 +103,22 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (!validEmail(email)) {
         throw 'Email is not valid.'
     }
-    if (typeof username !== 'string' || username.trim().length < 4) {
-        throw 'Username must be at least 4 characters long.'
+    if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.'
     }
-    if (username.match('[^A-Za-z0-9]+')) {
-        throw 'Username must only consist of alphanumeric characters only.'
-    }
-    const user = await getByUsername(username)
+    let user = await getByUsername(username)
     if (user) {
         throw 'Provided username is unavailable.'
     }
-    if (typeof password !== 'string' || password.trim().length < 8) {
-        throw 'Password must be at least 8 characters long.'
-    }
-    if (password.match('[ ]+')) {
-        throw 'Password cannot contain spaces.'
+    if (typeof password !== 'string' || password.trim().length < 8 || password.match('[ ]+')) {
+        throw 'Password must be at least 8 characters long and cannot contain spaces.'
     }
     const hash = await bcrypt.hash(password, saltRounds)
     const collection = await users()
+    user = await getByEmail(email)
+    if (user) {
+        throw 'Email is already taken.'
+    }
     const {insertedId} = await collection.insertOne({
         firstName,
         lastName,
@@ -284,6 +289,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
 module.exports = {
     validEmail,
     getByUsername,
+    getByEmail,
     getById,
     create,
     getNumberOfShares,

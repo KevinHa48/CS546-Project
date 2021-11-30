@@ -15,32 +15,30 @@ app.set('view engine', 'handlebars');
 
 app.use(session({
     name: "AuthCookie",
-    secret: "some secret string!",
-    resave: false,
+    secret: "$8r}{W04X,a%x>]L]1zA",
+    resave: true,
     saveUninitialized: true,
-    cookie: {maxAge: 30000}
+    cookie: {maxAge: 900000} // 15 minutes
 }))
 
-app.use('/users', async (req, res, next) => {
-    if (req.method === 'GET' && req.session.user) {
-        return res.redirect('/')
+app.use('/', async (req, res, next) => {
+    const routePath = req.path.split('/')
+    const loggedIn = !!req.session.user
+    if (req.method !== 'GET') {
+        next()
+        return
     }
-    next()
-})
 
-app.use('/wallet', async (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/users/login')
+    if (!loggedIn && (routePath[1] !== 'users' && routePath[1] !== '')) {
+        // alert('You must be logged in to access that page.')
+        res.redirect('/users/login')
+    } else if (loggedIn && routePath[1] === 'users' && routePath[2] !== 'logout') {
+        // alert('You are already logged in.')
+        res.redirect('/')
+    } else {
+        next()
     }
-    next()
 })
-
-// app.use('/market', async (req, res, next) => {
-//     if (!req.session.user) {
-//         res.redirect('/users/login')
-//     }
-//     next()
-// })
 
 configRoutes(app);
 
