@@ -11,22 +11,42 @@
 </header>
 <div class = "market-page">
     <h1 id = "wallet-greeting"> Good day, {{username}}</h1>
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget">
-        <div id="tradingview_42c72"></div>
-        <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" rel="noopener" target="_blank"><span class="blue-text">AAPL Chart</span></a> by TradingView</div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget(
-        {
-        "symbol": "NASDAQ:AAPL",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "allow_symbol_change": true
-        }
-        );
-        </script>
+    <div id = "chartDiv">
+        <canvas id="myChart"></canvas>
     </div>
-    <!-- TradingView Widget END -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+        ];
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'My First dataset',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: [0, 10, 5, 2, 20, 30, 45],
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+
+        const myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        )
+    </script>     
 </div>
 

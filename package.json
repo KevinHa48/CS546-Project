@@ -18,11 +18,13 @@
   "homepage": "https://github.com/KevinHa48/CS546-Project#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "chart.js": "^3.6.1",
     "express": "^4.17.1",
     "express-handlebars": "^5.3.4",
     "express-session": "^1.17.2",
     "handlebars": "^4.7.7",
     "mongodb": "^4.1.4",
+    "nodemon": "^2.0.15",
     "xss": "^1.0.10"
   }
 }

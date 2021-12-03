@@ -312,3 +312,12 @@ th {
     margin-top: 3%;
 }
 /* songs css ends here */
+
+
+/* Wallet chart css begins here */
+#chartDiv {
+    height: 400px;
+    width: 600px;
+}
+
+/* Wallet chart css ends here */
