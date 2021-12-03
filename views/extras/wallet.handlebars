@@ -9,7 +9,315 @@
         </ul>
     </nav>
 </header>
-<div class = "market-page">
+    <h1 id = "greeting">Good evening, {{username}}.</h1>
+    <div class = "grid-container">
+
+        <div class = "asset-graph">
+            <h1 id = "total-asset">${{balance}}</h1>
+            <p id = "asset-status">You're up +$100.29 (4.93%) Today!</p>
+            <div id = "chartDiv">
+                <canvas id="myChart"></canvas>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const labels = [
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                ];
+                const data = {
+                    labels: labels,
+                    datasets: [{
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [0, 10, 5, 2, 20, 30, 45],
+                    }]
+                };
+        
+                const config = {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                }
+        
+                const myChart = new Chart(
+                    document.getElementById('myChart'),
+                    config
+                )
+            </script>
+                <div class = "owned-songs">
+                    <!-- <h1> Owned songs</h1>
+                    <hr class = "dividers"> -->
+                    <div class = "carousel">
+                        <table class = "song-carousel">
+                            <thead class = "song-header">
+                                <tr class = "e">
+                                    <th>Songs Owned </th>
+                                    <th>Date Purchased</th>
+                                    <th>Current Value</th>
+                                </tr>
+                            </thead>
+                            {{#each songs}}
+                            <tr class= "song-entry">
+                                <td class = "song-cell">
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">{{name}}</p>
+                                    <p class = "artist">{{artist}}</p>
+                                   
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>${{price}}</td>
+                            </tr>
+                            {{/each}}
+                            {{!-- <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                  
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                   
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                    
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                    
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>           
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr>
+                            <tr class= "song-entry">
+                                <td>
+                                    <img
+                                    class = "covers" 
+                                    src = "public/images/cali.jpg">
+                                    <p class = "song-name">Californication</p>
+                                    <p class = "artist">Red Hot Chili Peppers</p>
+                                
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>$7632.90</td>
+                            </tr> --}}
+                        </table>
+                    </div>  
+                </div>
+        </div>
+         
+        <!--------- End Asset Graph ------------->
+
+        <div class = "sidebar">
+            <h3 class = "sb-headers"> Wallet</h3>
+            <hr class = "div-line">
+            <table class = "summary">
+                <tr class = "wallet-row">
+                    <td>Total Assets</td>
+                    <td>${{balance}}</td>
+                </tr>
+                <tr>
+                    <td>Buying Power</td>
+                    <td>${{balance}}</td>
+                </tr>
+            </table>
+            <h3 class = "sb-headers">Shares</h3>
+            <hr>
+            <table class = "stock-summary">
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                    <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+            </table>
+            <h3 class = "sb-headers">Recent Transactions</h3>
+            <hr>
+            <table class = "stock-summary">
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+                    <tr class = "wallet-row">
+                    <td>
+                        <div class = "industry-mini">
+                            <img
+                            class = "share-logo" 
+                            alt = "Spotify Logo"
+                            src = "public/images/spotify.svg"/>
+                            <p>SPOT</p>
+                        </div>
+                        <p>$274.79</p>
+                    </td>
+                    <td>
+                        <p>Owned: 10</p>
+                        <p class = "change">0.74%</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{{!-- <div class = "market-page">
     <h1 id = "wallet-greeting"> Good day, {{username}}</h1>
     <div id = "chartDiv">
         <canvas id="myChart"></canvas>
@@ -27,7 +335,6 @@
         const data = {
             labels: labels,
             datasets: [{
-                label: 'My First dataset',
                 backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
                 data: [0, 10, 5, 2, 20, 30, 45],
@@ -49,4 +356,4 @@
         )
     </script>     
 </div>
-
+ --}}

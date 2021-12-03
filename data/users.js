@@ -154,7 +154,7 @@ const addBalance = async (id, amt) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update balance for user.'
     }
-    const user = await get(id)
+    const user = await getById(id)
     return user
 }
 
@@ -264,7 +264,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user transactions history and balance after transaction.'
     }
-    const user = await get(userId)
+    const user = await getById(userId)
     if (pos === 'buy' && user.wallet.balance < price) {
         throw 'User cannot afford to buy the rights to this music.'
     }
@@ -282,7 +282,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user holdings after transaction.'
     }
-    const result = await get(userId)
+    const result = await getById(userId)
     return result
 }
 
