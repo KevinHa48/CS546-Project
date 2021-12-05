@@ -1,6 +1,7 @@
-
 const {users} = require('../config/mongoCollection')
+const {getIndustry, getAllIndustries} = require('./industries')
 const {ObjectId} = require('mongodb')
+const axios = require('axios')
 const bcrypt = require('bcryptjs')
 const saltRounds = 16
 
@@ -160,12 +161,57 @@ const addBalance = async (id, amt) => {
 
 const getNumberOfShares = async (userId, stockId) => {
     // calculates the total number of shares a user has of a particular stock.
-    const user = await get(userId)
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const industry = await getIndustry(stockId)
     const {transactions} = user.wallet
     return transactions
         .filter(transaction => transaction._itemId === stockId)
         .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
         .reduce((a, b) => a + b, 0)
+}
+
+const calculatePortfolioValue = async (userId) => {
+    const _userId = getObjectId(userId)
+    let user = await getById(userId)
+    const industries = await getAllIndustries()
+    const tickers = industries.map(document => document.symbol)
+    if (tickers.length === 0) {
+        throw 'No tickers provided!'
+    }
+    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
+        params: {
+            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
+        },
+        headers: {
+            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
+        }
+    })
+    const prices = response.data.quoteResponse.result
+    let value = 0.0
+    for (const price of prices) {
+        const {symbol, ask} = price
+        for (const industry of industries) {
+            if (industry.symbol === symbol) {
+                const shares = getNumberOfShares(userId, industry._id)
+                value = ask * shares
+                break
+            }
+        }
+    }
+    const date = new Date()
+    const collection = await users()
+    const updateInfo = await collection.updateOne({_id: _userId}, {
+        $push: {
+            'wallet.portfolioValues': {
+                date: date.toDateString(), 
+                value
+            }
+        }
+    })
+    user = await getById(userId)
+    return user.wallet.portfolioValues
 }
 
 const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
@@ -287,6 +333,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
 }
 
 module.exports = {
+    getObjectId,
     validEmail,
     getByUsername,
     getByEmail,
@@ -295,5 +342,6 @@ module.exports = {
     getNumberOfShares,
     addBalance,
     addStockTransaction,
-    addSongTransaction
+    addSongTransaction,
+    calculatePortfolioValue
 }

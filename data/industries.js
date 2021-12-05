@@ -37,4 +37,9 @@ const getAllIndustries = async() => {
     return allIndustries;
 }
 
+module.exports = {
+    getIndustry,
+    getAllIndustries
+}
+
 // For deleting and updating, the user's current portfolio would also need to be updated.

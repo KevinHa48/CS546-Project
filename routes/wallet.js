@@ -1,4 +1,5 @@
 const express = require("express");
+const xss = require("xss")
 const { users, songs } = require("../data");
 const router = express.Router();
 
@@ -33,5 +34,22 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     res.render("extras/wallet", {});
 });
+
+router.get('/portfolio_value', async (req, res) => {
+    const userId = xss(req.body.userId)
+    try {
+        const _userId = users.getObjectId(userId)
+        const user = await users.getById(userId)
+    } catch (e) {
+        res.status(400).json({error: e})
+        return
+    }
+    try {
+        const portfolioValues = await users.calculatePortfolioValue(userId)
+        res.json(portfolioValues)
+    } catch {
+        res.status(500).json({error: 'Internal Server Error'})
+    }
+})
 
 module.exports = router;
