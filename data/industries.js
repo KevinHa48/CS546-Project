@@ -14,6 +14,33 @@ const idValidator = (id) => {
     return convertedId;
 }
 
+function validateStringParams(param, paramName) {
+    if (!param) {
+        throw `Error: No ${paramName} passed to the function`;
+    } else if (typeof param !== "string") {
+        throw `Type Error: Argument ${param} passed is not a string ${paramName}`;
+    } else if (param.length === 0) {
+        throw `Error: No element present in string ${paramName}`;
+    } else if (!param.trim()) {
+        throw `Error: Empty spaces passed to string ${paramName}`;
+    }
+}
+
+const createIndustry = async (name, symbol) => {
+    validateStringParams(name, "name")
+    validateStringParams(symbol, "symbol")
+    let newIndustry = {
+        name: name,
+        symbol: symbol
+    }
+    const industryCollection = await industries();
+    const industryInfo = await industryCollection.insertOne(newIndustry);
+    if (industryInfo.insertedCount === 0) {
+        throw 'Could not add industry';
+    }
+    return 0;
+}
+
 const getIndustry = async (id) => {
     const industryId = idValidator(id);
     
@@ -38,3 +65,9 @@ const getAllIndustries = async() => {
 }
 
 // For deleting and updating, the user's current portfolio would also need to be updated.
+
+module.exports = {
+    createIndustry,
+    getIndustry, 
+    getAllIndustries
+};
