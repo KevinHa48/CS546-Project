@@ -1,6 +1,7 @@
-
 const {users} = require('../config/mongoCollection')
+const {getIndustry, getAllIndustries} = require('./industries')
 const {ObjectId} = require('mongodb')
+const axios = require('axios')
 const bcrypt = require('bcryptjs')
 const saltRounds = 16
 
@@ -119,6 +120,8 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (user) {
         throw 'Email is already taken.'
     }
+
+    const date = new Date();
     const {insertedId} = await collection.insertOne({
         firstName,
         lastName,
@@ -132,11 +135,17 @@ const create = async (firstName, lastName, email, age, username, password) => {
                 songs: []
             },
             balance: 0.0,
-            portfolioValues: [],
+            portfolioValues: [
+                {
+                    date: date.toDateString(), 
+                    value: 0
+                }
+            ],
             transactions: []
         }
     })
-    const result = await getById(insertedId.toString())
+
+    const result = await getById(insertedId.toString());
     return result
 }
 
@@ -160,12 +169,66 @@ const addBalance = async (id, amt) => {
 
 const getNumberOfShares = async (userId, stockId) => {
     // calculates the total number of shares a user has of a particular stock.
-    const user = await get(userId)
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const industry = await getIndustry(stockId)
     const {transactions} = user.wallet
     return transactions
         .filter(transaction => transaction._itemId === stockId)
         .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
         .reduce((a, b) => a + b, 0)
+}
+
+const calculatePortfolioValue = async (userId) => {
+    const _userId = getObjectId(userId)
+    let user = await getById(userId)
+    const industries = await getAllIndustries()
+    const tickers = industries.map(document => document.symbol)
+    if (tickers.length === 0) {
+        throw 'No tickers provided!'
+    }
+    console.log(tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, ''));
+    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
+        params: {
+            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
+        },
+        headers: {
+            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
+        }
+    })
+    const prices = response.data.quoteResponse.result
+    console.log(prices);
+    let value = 0.0
+    for (const price of prices) {
+        const {symbol, ask} = price
+        for (const industry of industries) {
+            if (industry.symbol === symbol) {
+                // await was missing here
+                const shares = await getNumberOfShares(userId, industry._id)
+                console.log(ask*shares);
+                // Changed to +=
+                value += ask * shares
+                break
+            }
+        }
+    }
+    // Force to two decimal places, and do not round.
+    value = Math.trunc(value*100)/100;
+    
+    const date = new Date()
+    const collection = await users()
+   
+    const updateInfo = await collection.updateOne({_id: _userId}, {
+        $push: {
+            'wallet.portfolioValues': {
+                date: date.toDateString(), 
+                value
+            }
+        }
+    })
+    user = await getById(userId)
+    return user.wallet.portfolioValues
 }
 
 const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
@@ -187,7 +250,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     if (typeof shares !== 'number' || shares <= 0) {
         throw 'Shares must be a number greater than 0.'
     }
-    const user = await get(userId)
+    const user = await getById(userId)
     if (price * shares > user.wallet.balance) {
         throw 'User does not have enough money to make this transaction.'
     }
@@ -199,6 +262,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     const transaction = {
         _id: new ObjectId(),
         datetime,
+        type: "stock",
         _itemId: _stockId,
         price,
         shares,
@@ -226,7 +290,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user holdings after transaction.'
     }
-    const result = await get(userId)
+    const result = await getById(userId)
     return result
 }
 
@@ -249,6 +313,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     const transaction = {
         _id: new ObjectId(),
         datetime,
+        type: "song",
         _itemId: _songId,
         price,
         pos
@@ -287,6 +352,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
 }
 
 module.exports = {
+    getObjectId,
     validEmail,
     getByUsername,
     getByEmail,
@@ -295,5 +361,6 @@ module.exports = {
     getNumberOfShares,
     addBalance,
     addStockTransaction,
-    addSongTransaction
+    addSongTransaction,
+    calculatePortfolioValue
 }
