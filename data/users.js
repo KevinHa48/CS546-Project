@@ -53,6 +53,21 @@ const getByUsername = async username => {
     username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
+    if (!user) {
+        throw 'No user was found with the provided username.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -63,6 +78,21 @@ const getByEmail = async email => {
     email = email.toLowerCase()
     const collection = await users()
     const user = collection.findOne({email})
+    if (!user) {
+        throw 'No user was found with the provided email.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -178,6 +208,26 @@ const getNumberOfShares = async (userId, stockId) => {
         .filter(transaction => transaction._itemId === stockId)
         .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
         .reduce((a, b) => a + b, 0)
+}
+
+const getAveragePrice = async (userId, stockId) => {
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const totalShares = await getNumberOfShares(userId, stockId)
+    let {transactions} = user.wallet
+    transactions = transactions.filter(transaction => transaction._itemId === stockId)
+    if (totalShares === 0) {
+        throw 'User does not own any of this stock.'
+    }
+    let count = totalShares // decrement as
+    let averagePrice = 0.0
+    for (let i = transactions.length - 1; i >= 0 && count > 0; --i) {
+        const {shares, price} = transactions[i]
+        averagePrice += price * shares / totalShares
+        count -= shares
+    }
+    return averagePrice
 }
 
 const calculatePortfolioValue = async (userId) => {
@@ -359,6 +409,7 @@ module.exports = {
     getById,
     create,
     getNumberOfShares,
+    getAveragePrice,
     addBalance,
     addStockTransaction,
     addSongTransaction,

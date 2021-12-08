@@ -1,7 +1,8 @@
 const express = require("express");
 const { getSpotifyData } = require('../utils/spotifyAPI');
 const xss = require("xss")
-const { users, songs } = require("../data");
+const { users, songs, industries } = require("../data");
+const { getAveragePrice } = require("../data/users");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -17,12 +18,25 @@ router.get("/", async (req, res) => {
         }));
 
         const time = new Date().getHours();
-        const greeting = time < 12 ? 'morning' : date < 18 ? 'afternoon' : 'evening';
+        const greeting = time < 12 ? 'morning' : time < 18 ? 'afternoon' : 'evening';
+
+        let stockIds = userData.wallet.holdings.stocks
+        let stocks = []
+        for (const stockId of stockIds) {
+            const {symbol} = await industries.getIndustry(stockId)
+            const shares = await users.getNumberOfShares(userData._id, stockId)
+            const price = await users.getAveragePrice(userData._id, stockId)
+            stocks.push({
+                symbol,
+                shares,
+                price
+            })
+        }
 
         res.render("extras/wallet", {
             username: userData.firstName,
             time: greeting,
-            stocks: userData.wallet.holdings.stocks,
+            stocks,
             songs: songArr,
             balance: userData.wallet.balance,
             portfolioValues: userData.wallet.portfolioValues,
@@ -32,7 +46,7 @@ router.get("/", async (req, res) => {
     catch(e) {
         // Error here.
         console.log(e)
-        res.status(400).json({"error": "e"})
+        res.status(400).json({"error": e})
     }
 });
 

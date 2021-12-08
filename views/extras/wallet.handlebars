@@ -65,74 +65,30 @@
                     <td>${{balance}}</td>
                 </tr>
             </table>
-            <h3 class = "sb-headers">Shares</h3>
-            <hr>
-            <table class = "stock-summary">
-                <tr class = "wallet-row">
-                    <td>
-                        <div class = "industry-mini">
-                            <img
-                            class = "share-logo" 
-                            alt = "Spotify Logo"
-                            src = "public/images/spotify.svg"/>
-                            <p>SPOT</p>
-                        </div>
-                        <p>$274.79</p>
-                    </td>
-                    <td>
-                        <p>Owned: 10</p>
-                        <p class = "change">0.74%</p>
-                    </td>
-                </tr>
-                <tr class = "wallet-row">
-                    <td>
-                        <div class = "industry-mini">
-                            <img
-                            class = "share-logo" 
-                            alt = "Spotify Logo"
-                            src = "public/images/spotify.svg"/>
-                            <p>SPOT</p>
-                        </div>
-                        <p>$274.79</p>
-                    </td>
-                    <td>
-                        <p>Owned: 10</p>
-                        <p class = "change">0.74%</p>
-                    </td>
-                </tr>
-                <tr class = "wallet-row">
-                    <td>
-                        <div class = "industry-mini">
-                            <img
-                            class = "share-logo" 
-                            alt = "Spotify Logo"
-                            src = "public/images/spotify.svg"/>
-                            <p>SPOT</p>
-                        </div>
-                        <p>$274.79</p>
-                    </td>
-                    <td>
-                        <p>Owned: 10</p>
-                        <p class = "change">0.74%</p>
-                    </td>
-                </tr>
-                    <tr class = "wallet-row">
-                    <td>
-                        <div class = "industry-mini">
-                            <img
-                            class = "share-logo" 
-                            alt = "Spotify Logo"
-                            src = "public/images/spotify.svg"/>
-                            <p>SPOT</p>
-                        </div>
-                        <p>$274.79</p>
-                    </td>
-                    <td>
-                        <p>Owned: 10</p>
-                        <p class = "change">0.74%</p>
-                    </td>
-                </tr>
-            </table>
+            {{#if stocks.length}}
+                <h3 class = "sb-headers">Shares</h3>
+                <hr>
+                <table class = "stock-summary">
+                    {{#stocks}}
+                        <tr class = "wallet-row">
+                            <td>
+                                <div class = "industry-mini">
+                                    <img
+                                    class = "share-logo" 
+                                    alt = "Spotify Logo"
+                                    src = "public/images/spotify.svg"/>
+                                    <p>SPOT</p>
+                                </div>
+                                <p>${{price}}</p>
+                            </td>
+                            <td>
+                                <p>Owned: {{shares}}</p>
+                                <p class = "change">0.0%</p>
+                            </td>
+                        </tr>
+                    {{/stocks}}
+                </table>
+            {{/if}}
             <h3 class = "sb-headers">Recent Transactions</h3>
             <hr>
             <table class = "stock-summary">
