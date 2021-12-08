@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
     try {
-        const username = req.session.user;
+        const username = xss(req.session.user);
         const userData = await users.getByUsername(username);
      
         /* For each song call get and query for it's object representation, then put
@@ -23,13 +23,16 @@ router.get("/", async (req, res) => {
         let stockIds = userData.wallet.holdings.stocks
         let stocks = []
         for (const stockId of stockIds) {
-            const {symbol} = await industries.getIndustry(stockId)
+            const {symbol, lastPrice} = await industries.getIndustry(stockId)
             const shares = await users.getNumberOfShares(userData._id, stockId)
             const price = await users.getAveragePrice(userData._id, stockId)
+            let ret = (lastPrice - price) / price
+            ret = Math.trunc(ret * 10000) / 100 // in terms of %, contains two decimal places.
             stocks.push({
                 symbol,
                 shares,
-                price
+                price,
+                return: ret,
             })
         }
 
@@ -55,15 +58,7 @@ router.post("/", async (req, res) => {
 });
 
 router.get('/portfolio_value', async (req, res) => {
-    const username = req.session.user;
-    console.log(username);
-    // try {
-    //     const _userId = users.getObjectId(userId)
-    //     const user = await users.getBy(userId)
-    // } catch (e) {
-    //     res.status(400).json({error: e})
-    //     return
-    // }
+    const username = xss(req.session.user);
     try {
         const user = await users.getByUsername(username)
         console.log(user);

@@ -119,6 +119,26 @@ const getById = async id => {
     return user
 }
 
+const getAll = async () => {
+    const collection = await users()
+    let result = await collection.find().toArray()
+    result = result.map(user => {
+        user._id = user._id.toString()
+        for (holdingType of Object.keys(user.wallet.holdings)) {
+            user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        }
+        user.wallet.transactions = user.wallet.transactions.map(transaction => {
+            return {
+                ...transaction,
+                _id: transaction._id.toString(),
+                _itemId: transaction._itemId.toString()
+            }
+        }) 
+        return user
+    })
+    return result
+}
+
 const create = async (firstName, lastName, email, age, username, password) => {
     /* this method should run whenever someone creates a new account. password 
        should be hashed when passed in. */
@@ -234,34 +254,10 @@ const calculatePortfolioValue = async (userId) => {
     const _userId = getObjectId(userId)
     let user = await getById(userId)
     const industries = await getAllIndustries()
-    const tickers = industries.map(document => document.symbol)
-    if (tickers.length === 0) {
-        throw 'No tickers provided!'
-    }
-    console.log(tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, ''));
-    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
-        params: {
-            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
-        },
-        headers: {
-            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
-        }
-    })
-    const prices = response.data.quoteResponse.result
-    console.log(prices);
     let value = 0.0
-    for (const price of prices) {
-        const {symbol, ask} = price
-        for (const industry of industries) {
-            if (industry.symbol === symbol) {
-                // await was missing here
-                const shares = await getNumberOfShares(userId, industry._id)
-                console.log(ask*shares);
-                // Changed to +=
-                value += ask * shares
-                break
-            }
-        }
+    for (const industry of industries) {
+        const shares = await getNumberOfShares(userId, industry._id)
+        value += shares * industry.lastPrice
     }
     // Force to two decimal places, and do not round.
     value = Math.trunc(value*100)/100;
@@ -407,6 +403,7 @@ module.exports = {
     getByUsername,
     getByEmail,
     getById,
+    getAll,
     create,
     getNumberOfShares,
     getAveragePrice,
