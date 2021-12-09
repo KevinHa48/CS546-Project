@@ -1,7 +1,6 @@
 const {industries} = require("../config/mongoCollection");
 const {ObjectId} = require("mongodb");
 var axios = require("axios").default;
-const { response } = require("express");
 
 // Industry names will be provided from an API.
 // These functions will only be displayed in Admin view.
