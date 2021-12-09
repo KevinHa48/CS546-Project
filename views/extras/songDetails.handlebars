@@ -39,6 +39,9 @@
         <h2>currently Available</h2>
         <h3>{{songs.currentlyAvailable}}</h3>
     </div>
-    <form id="buy-songs" action="/wallet" method="POST" class="buy-songs">
+    <form id="buy-songs" action="/wallet/songs/{{songs._id}}" method="POST" class="buy-songs">
         <button type="submit">Buy Now</button>
+    {{#if errors}}
+        <p>{{errors}}</p>
+    {{/if}}
 </main>

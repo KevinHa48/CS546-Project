@@ -9,6 +9,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     let songs = await songsData.get(req.params.id);
+    console.log(songs);
     res.render("extras/songDetails", {title: "Music Details", songs: songs});
 });
 
