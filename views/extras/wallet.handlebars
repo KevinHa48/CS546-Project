@@ -9,23 +9,142 @@
         </ul>
     </nav>
 </header>
-<div class = "market-page">
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget">
-        <div id="tradingview_42c72"></div>
-        <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" rel="noopener" target="_blank"><span class="blue-text">AAPL Chart</span></a> by TradingView</div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget(
-        {
-        "symbol": "NASDAQ:AAPL",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "allow_symbol_change": true
-        }
-        );
-        </script>
-    </div>
-    <!-- TradingView Widget END -->
-</div>
+    <h1 id = "greeting">Good {{time}}, {{username}}.</h1>
+    <div class = "grid-container">
 
+        <div class = "asset-graph">
+            <h1 id = "total-asset">${{balance}}</h1>
+            <p id = "asset-status">You're up +$100.29 (4.93%) Today!</p>
+            <div id = "chartDiv">
+                <canvas id="myChart"></canvas>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <div class = "owned-songs">
+                <div class = "carousel">
+                    <table class = "song-carousel">
+                        <thead class = "song-header">
+                            <tr class = "e">
+                                <th>Songs Owned </th>
+                                <th>Date Purchased</th>
+                                <th>Current Value</th>
+                            </tr>
+                        </thead>
+                        {{#if songs}}
+                            {{#each songs}}
+                            <tr class= "song-entry">
+                                <td class = "song-cell">
+                                    <img
+                                    class = "covers" 
+                                    src = "{{image}}">
+                                    <p class = "song-name">{{name}}</p>
+                                    <p class = "artist">{{artist}}</p>
+                                    
+                                </td>
+                                <td>February 1, 2021</td>
+                                <td>${{price}}</td>
+                            </tr>
+                            {{/each}}
+                        {{else}}
+                            <tr class= "song-entry">
+                                <h2>No songs purchased.</h2>
+                            </tr>
+                        {{/if}}
+                    </table>
+                </div>  
+            </div>
+
+        </div>
+         
+        <!--------- End Asset Graph ------------->
+
+        <div class = "sidebar">
+            <h3 class = "sb-headers"> Wallet</h3>
+            <hr class = "div-line">
+            <table class = "summary">
+                <tr class = "wallet-row">
+                    <td>Total Assets</td>
+                    <td>${{balance}}</td>
+                </tr>
+                <tr>
+                    <td>Buying Power</td>
+                    <td>${{balance}}</td>
+                </tr>
+            </table>
+            <h3 class = "sb-headers">Shares</h3>
+            <hr>
+            <table class = "stock-summary">
+               {{#if stocks}}
+                    {{#each stocks}}
+                        <tr class = "wallet-row">
+                            <td>
+                                <div class = "industry-mini">
+                                    <img
+                                    class = "share-logo" 
+                                    alt = "{{name}} Logo"
+                                    src = "/public/images/stocks/{{name}}.png">
+                                    <p>{{symbol}}</p>
+                                </div>
+                                <p class = "action">{{pos}}</p>
+                            </td>
+                            <td>
+                                <p>Shares:{{shares}}</p>
+                            </td>
+                        </tr>
+                    {{/each}}
+                    {{else}}
+                        <tr class = "wallet-row">
+                            <td>
+                                <h3 id = "no-tra">No stocks invested for this account.</h3>
+                                <h4 id = "no-tra">Head to the Market to start investing!</h4>
+                            </td>
+                        </tr>
+                {{/if}}
+            </table>
+            <h3 class = "sb-headers">Recent Transactions</h3>
+            <hr>
+            <table class = "stock-summary">
+                {{#if transactions}}
+                    {{#each transactions}}
+                        {{#if type}}
+                            <tr class = "wallet-row">
+                                <td>
+                                    <div class = "industry-mini">
+                                        <img
+                                        class = "share-logo" 
+                                        alt = "{{name}} Logo"
+                                        src = "/public/images/stocks/{{name}}.png">
+                                        <p>{{symbol}}</p>
+                                    </div>
+                                    <p class = "action">{{pos}}</p>
+                                </td>
+                                <td>
+                                    <p>Shares:{{shares}}</p>
+                                    <p class = "change">${{price}}</p>
+                                </td>
+                            </tr>
+                        {{else}}
+                            <tr class = "wallet-row">
+                                <td>
+                                    <p>{{name}}</p>
+                                    <p>{{artist}}</p>
+                                </td>
+                                <td>
+                                    <p>{{pos}}</p>
+                                    <p class = "change">${{price}}</p>
+                                </td>
+                            </tr>
+                        {{/if}}
+                    {{/each}}
+                {{else}}
+                    <tr class = "wallet-row">
+                        <td>
+                            <h3 id = "no-tra">No transactions on this account</h3>
+                            <h4 id = "no-tra">Head to the Market to start investing!</h4>
+                        </td>
+                    </tr>
+                {{/if}}
+            </table>
+        </div>
+    </div>
+    <script src = "/public/js/portfolio.js"></script>
