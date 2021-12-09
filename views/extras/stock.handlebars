@@ -12,40 +12,50 @@
 <img src={{logo}}>
 <h1>{{name}}</h1>
 <!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget">
-    <div id="tradingview_42c72"></div>
-    <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" rel="noopener" target="_blank"><span class="blue-text">AAPL Chart</span></a> by TradingView</div>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script type="text/javascript">
-    new TradingView.widget(
-    {
-    "symbol": {{symbol}},
-    "timezone": "Etc/UTC",
-    "theme": "dark",
-    "allow_symbol_change": true
-    }
-    );
-    </script>
+<div id="stock-body">
+    <div class="tradingview-widget-stock">
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+        new TradingView.widget(
+        {
+        "symbol": "{{symbol}}",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "allow_symbol_change": true
+        }
+        );
+        </script>
+    </div>
+    <!-- TradingView Widget END -->
+    <div id="stock-info">
+        <ul>
+            <li class="regularMarketPrice">
+                Current Price: {{regularMarketPrice}}
+            </li>
+            <li class="fiftyDayAverage">
+                Fifty Day Average: {{fiftyDayAverage}}
+            </li>
+            <li class="regularMarketDayHigh">
+                Market Day High: {{regularMarketDayHigh}}
+            </li>
+            <li class="underline">
+                Market Day Low {{regularMarketDayLow}}
+            </li>
+        </ul>
+    </div>
 </div>
-<!-- TradingView Widget END -->
-
-<h2 class="underline">
-    Current Price:
-</h2>
-<h2 class="underline">
-    Current Price:
-</h2>
-<h2 class="underline">
-    Current Price:
-</h2>
-<h2 class="underline">
-    Current Price:
-</h2>
-
-<div class="black-desc">
-        <div class="description">
-            <p class="buy-now">
-                Buy Now!
-            </p>
+<div id="stock-form">
+    <form id="buy-stock" action="/wallet" method="POST">
+        <div id="stock-form-contents">
+            <div id="stock-form-first">
+                <label for="shares">How many shares would you like to purchase?</label>
+            </div>
+            <div id="stock-form-second">
+                <input type="text" id="shares" placeholder="Number of Shares">
+            </div>
+            <div id="stock-form-second">
+                <button type="submit">Buy Now</button>
+            </div>
         </div>
-    </div> 
+    </form>
+</div>

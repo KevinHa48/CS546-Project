@@ -1,5 +1,7 @@
 const {industries} = require("../config/mongoCollection");
 const {ObjectId} = require("mongodb");
+var axios = require("axios").default;
+const { response } = require("express");
 
 // Industry names will be provided from an API.
 // These functions will only be displayed in Admin view.
@@ -64,10 +66,31 @@ const getAllIndustries = async() => {
     return allIndustries;
 }
 
+
+const financeAPI = async(symbol) => {
+    validateStringParams(symbol, "symbol")
+    var options = {
+    method: 'GET',
+    url: 'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + symbol,
+    params: {modules: 'defaultKeyStatistics,assetProfile'},
+    headers: {
+        'x-api-key': 'cIbXzdZfgs4mpo8tDVy3S3gbjIELpOYqaNJuYhKn'
+    }
+    };
+    let returnVal = 0
+    await axios.request(options).then(function (response2) {
+        returnVal = response2.data
+    }).catch(function (error) {
+        console.error(error);
+    });
+    return returnVal
+}
+
 // For deleting and updating, the user's current portfolio would also need to be updated.
 
 module.exports = {
     createIndustry,
     getIndustry, 
-    getAllIndustries
+    getAllIndustries,
+    financeAPI
 };
