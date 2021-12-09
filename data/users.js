@@ -260,7 +260,7 @@ const calculatePortfolioValue = async (userId) => {
         value += shares * industry.lastPrice
     }
     // Force to two decimal places, and do not round.
-    value = Math.trunc(value*100)/100;
+    value = Math.trunc(value*100)/100 + user.balance;
     
     const date = new Date()
     const collection = await users()
@@ -414,6 +414,14 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
         price,
         pos
     }
+    const user = await getById(userId)
+    if (pos === 'buy' && user.wallet.balance < price) {
+        throw 'User cannot afford to buy the rights to this music.'
+    }
+    if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
+        throw 'User does not own the rights to the music that they are trying to sell.'
+    }
+
     const collection = await users()
     let updateInfo = await collection.updateOne({_id: _userId}, {
         $push: {'wallet.transactions': transaction},
@@ -425,13 +433,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user transactions history and balance after transaction.'
     }
-    const user = await getById(userId)
-    if (pos === 'buy' && user.wallet.balance < price) {
-        throw 'User cannot afford to buy the rights to this music.'
-    }
-    if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
-        throw 'User does not own the rights to the music that they are trying to sell.'
-    }
+
     if (pos === 'buy') {
         updateInfo = await collection.updateOne({_id: _userId}, {$push: {'wallet.holdings.songs': _songId}})
     } else {

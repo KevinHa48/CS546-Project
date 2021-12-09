@@ -47,6 +47,10 @@ header {
 
 /* Wallet CSS starts here */
 
+.money-sum {
+    text-align: right;
+}
+
 #greeting {
     margin-top: 50px;
     font-weight: normal;
@@ -92,8 +96,7 @@ header {
 .summary {
     text-align: left;
     padding: 15px;
-    margin: 0 auto;
-    width: 450px;
+    width: 350px;
     border-spacing: 0 8px;
 }
 
@@ -127,6 +130,16 @@ header {
 
 #no-tra {
     text-align: center;
+}
+
+.rt-song-name {
+    font-weight: bold;
+    padding-bottom: 7.5px;
+}
+
+.rt-additional {
+    text-align: right;
+    width: 150px;
 }
 
 .change {
