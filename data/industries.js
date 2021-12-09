@@ -95,10 +95,21 @@ const fetchStockPrices = async () => {
     for (const stock of stockData) {
         for (const industry of stocks) {
             if (industry.symbol === stock.symbol) {
-                const lastPrice = stock.ask
+                const lastPrice = stock.regularMarketPrice
                 const lastPriceTime = new Date()
+                const {
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                } = stock
                 const _id = idValidator(industry._id)
-                const updateInfo = await collection.updateOne({_id}, {$set: {lastPrice, lastPriceTime}})
+                const updateInfo = await collection.updateOne({_id}, {$set: {
+                    lastPrice, 
+                    lastPriceTime,
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                }})
                 if (updateInfo.matchedCount === 0) {
                     throw 'Could not find industry with the provided id.'
                 }
@@ -109,7 +120,6 @@ const fetchStockPrices = async () => {
             }
         }
     }
-    console.log('Fetched all stock prices successfully!')
 }
 
 module.exports = {
