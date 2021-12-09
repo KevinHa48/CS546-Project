@@ -1,6 +1,7 @@
-
 const {users} = require('../config/mongoCollection')
+const {getIndustry, getAllIndustries} = require('./industries')
 const {ObjectId} = require('mongodb')
+const axios = require('axios')
 const bcrypt = require('bcryptjs')
 const saltRounds = 16
 
@@ -52,6 +53,21 @@ const getByUsername = async username => {
     username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
+    if (!user) {
+        throw 'No user was found with the provided username.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -62,6 +78,21 @@ const getByEmail = async email => {
     email = email.toLowerCase()
     const collection = await users()
     const user = collection.findOne({email})
+    if (!user) {
+        throw 'No user was found with the provided email.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -86,6 +117,26 @@ const getById = async id => {
         }
     })
     return user
+}
+
+const getAll = async () => {
+    const collection = await users()
+    let result = await collection.find().toArray()
+    result = result.map(user => {
+        user._id = user._id.toString()
+        for (holdingType of Object.keys(user.wallet.holdings)) {
+            user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        }
+        user.wallet.transactions = user.wallet.transactions.map(transaction => {
+            return {
+                ...transaction,
+                _id: transaction._id.toString(),
+                _itemId: transaction._itemId.toString()
+            }
+        }) 
+        return user
+    })
+    return result
 }
 
 const create = async (firstName, lastName, email, age, username, password) => {
@@ -119,6 +170,8 @@ const create = async (firstName, lastName, email, age, username, password) => {
     if (user) {
         throw 'Email is already taken.'
     }
+
+    const date = new Date();
     const {insertedId} = await collection.insertOne({
         firstName,
         lastName,
@@ -132,11 +185,17 @@ const create = async (firstName, lastName, email, age, username, password) => {
                 songs: []
             },
             balance: 0.0,
-            portfolioValues: [],
+            portfolioValues: [
+                {
+                    date: date.toDateString(), 
+                    value: 0
+                }
+            ],
             transactions: []
         }
     })
-    const result = await getById(insertedId.toString())
+
+    const result = await getById(insertedId.toString());
     return result
 }
 
@@ -154,18 +213,68 @@ const addBalance = async (id, amt) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update balance for user.'
     }
-    const user = await get(id)
+    const user = await getById(id)
     return user
 }
 
 const getNumberOfShares = async (userId, stockId) => {
     // calculates the total number of shares a user has of a particular stock.
-    const user = await get(userId)
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const industry = await getIndustry(stockId)
     const {transactions} = user.wallet
     return transactions
         .filter(transaction => transaction._itemId === stockId)
         .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
         .reduce((a, b) => a + b, 0)
+}
+
+const getAveragePrice = async (userId, stockId) => {
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const totalShares = await getNumberOfShares(userId, stockId)
+    let {transactions} = user.wallet
+    transactions = transactions.filter(transaction => transaction._itemId === stockId)
+    if (totalShares === 0) {
+        throw 'User does not own any of this stock.'
+    }
+    let count = totalShares // decrement as
+    let averagePrice = 0.0
+    for (let i = transactions.length - 1; i >= 0 && count > 0; --i) {
+        const {shares, price} = transactions[i]
+        averagePrice += price * shares / totalShares
+        count -= shares
+    }
+    return averagePrice
+}
+
+const calculatePortfolioValue = async (userId) => {
+    const _userId = getObjectId(userId)
+    let user = await getById(userId)
+    const industries = await getAllIndustries()
+    let value = 0.0
+    for (const industry of industries) {
+        const shares = await getNumberOfShares(userId, industry._id)
+        value += shares * industry.lastPrice
+    }
+    // Force to two decimal places, and do not round.
+    value = Math.trunc(value*100)/100;
+    
+    const date = new Date()
+    const collection = await users()
+   
+    const updateInfo = await collection.updateOne({_id: _userId}, {
+        $push: {
+            'wallet.portfolioValues': {
+                date: date.toDateString(), 
+                value
+            }
+        }
+    })
+    user = await getById(userId)
+    return user.wallet.portfolioValues
 }
 
 const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
@@ -187,7 +296,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     if (typeof shares !== 'number' || shares <= 0) {
         throw 'Shares must be a number greater than 0.'
     }
-    const user = await get(userId)
+    const user = await getById(userId)
     if (price * shares > user.wallet.balance) {
         throw 'User does not have enough money to make this transaction.'
     }
@@ -199,6 +308,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     const transaction = {
         _id: new ObjectId(),
         datetime,
+        type: 1,
         _itemId: _stockId,
         price,
         shares,
@@ -226,7 +336,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user holdings after transaction.'
     }
-    const result = await get(userId)
+    const result = await getById(userId)
     return result
 }
 
@@ -249,6 +359,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     const transaction = {
         _id: new ObjectId(),
         datetime,
+        type: 0,
         _itemId: _songId,
         price,
         pos
@@ -264,7 +375,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user transactions history and balance after transaction.'
     }
-    const user = await get(userId)
+    const user = await getById(userId)
     if (pos === 'buy' && user.wallet.balance < price) {
         throw 'User cannot afford to buy the rights to this music.'
     }
@@ -282,18 +393,22 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update user holdings after transaction.'
     }
-    const result = await get(userId)
+    const result = await getById(userId)
     return result
 }
 
 module.exports = {
+    getObjectId,
     validEmail,
     getByUsername,
     getByEmail,
     getById,
+    getAll,
     create,
     getNumberOfShares,
+    getAveragePrice,
     addBalance,
     addStockTransaction,
-    addSongTransaction
+    addSongTransaction,
+    calculatePortfolioValue
 }

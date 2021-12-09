@@ -117,6 +117,7 @@ router.post('/signup', async (req, res) => {
     try {
         await users.create(firstName, lastName, email, age, username, password)
     } catch (e) {
+        console.log(e);
         res.status(500).render('extras/signup', {
             errors: ['Internal Server Error'],
             title,
