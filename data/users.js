@@ -300,7 +300,7 @@ const calculatePortfolioValue = async (userId) => {
         value += shares * industry.lastPrice;
     }
     // Force to two decimal places, and do not round.
-    value = Math.trunc(value * 100) / 100;
+    value = Math.trunc(value * 100) / 100 + user.balance;
 
     const date = new Date();
     const collection = await users();
@@ -399,6 +399,69 @@ const addStockTransaction = async (
     return result;
 };
 
+const sellStockTransaction = async (
+    userId,
+    datetime,
+    stockId,
+    pos,
+    price,
+    sharesToSell
+) => {
+    const _userId = getObjectId(userId);
+    const _stockId = getObjectId(stockId);
+    if (!(datetime instanceof Date)) {
+        throw "Must provide a valid Date object.";
+    }
+    if (typeof pos !== "string" || pos !== "sell") {
+        throw 'Pos must be "sell".';
+    }
+    if (typeof price !== "number" || price <= 0) {
+        throw "Price must be a number greater than 0.";
+    }
+    if (typeof sharesToSell !== "number" || sharesToSell <= 0) {
+        throw "Shares must be a number greater than 0.";
+    }
+    const numShares = await getNumberOfShares(userId, stockId);
+    if (numShares < sharesToSell) {
+        throw "Error: Cannot sell more shares than owned";
+    }
+    const transaction = {
+        _id: new ObjectId(),
+        datetime,
+        type: 1,
+        _itemId: _stockId,
+        price,
+        shares,
+        pos,
+    };
+    const collection = await users();
+    let updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {
+            $push: {"wallet.transactions": transaction},
+            $inc: {"wallet.balance": price * shares * (pos === "buy" ? -1 : 1)},
+        }
+    );
+    if (updateInfo.matchedCount === 0) {
+        throw "Could not find user with the provided id.";
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw "Failed to update user transactions history and balance after transaction.";
+    }
+    updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {$pull: {"wallet.holdings.stocks": _stockId}}
+    );
+    if (updateInfo.matchedCount === 0) {
+        throw "Could not find user with the provided id.";
+    }
+    if (updateInfo.modifiedCount === 0) {
+        throw "Failed to update user transactions history and balance after transaction.";
+    }
+    const result = await getById(userId);
+    return result;
+};
+
 const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     /* this will add a stock transaction to the transactions array for the user.
        the only difference is that this subdocument will include a shares key.
@@ -432,6 +495,14 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
         price,
         pos,
     };
+    const user = await getById(userId);
+    if (pos === "buy" && user.wallet.balance < price) {
+        throw "User cannot afford to buy the rights to this music.";
+    }
+    if (pos === "sell" && !(songId in user.wallet.holdings.songs)) {
+        throw "User does not own the rights to the music that they are trying to sell.";
+    }
+
     const collection = await users();
     let updateInfo = await collection.updateOne(
         {_id: _userId},
@@ -446,20 +517,12 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (updateInfo.modifiedCount === 0) {
         throw "Failed to update user transactions history and balance after transaction.";
     }
-    const user = await getById(userId);
-    if (pos === "buy" && user.wallet.balance < price) {
-        throw "User cannot afford to buy the rights to this music.";
-    }
-    if (pos === "sell" && !(songId in user.wallet.holdings.songs)) {
-        throw "User does not own the rights to the music that they are trying to sell.";
-    }
     const songsCollection = await songs();
 
     let currAvailabilityFlag = false;
     if (pos === "sell") {
         currAvailabilityFlag = true;
     }
-
     const updateSongInfo = {
         currentlyAvailable: currAvailabilityFlag,
     };
@@ -509,6 +572,7 @@ module.exports = {
     getAveragePrice,
     addBalance,
     addStockTransaction,
+    sellStockTransaction,
     addSongTransaction,
     calculatePortfolioValue,
 };

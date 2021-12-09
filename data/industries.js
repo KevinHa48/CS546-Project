@@ -1,6 +1,6 @@
 const {industries} = require("../config/mongoCollection");
 const {ObjectId} = require("mongodb");
-const axios = require('axios')
+var axios = require("axios").default;
 
 // Industry names will be provided from an API.
 // These functions will only be displayed in Admin view.
@@ -15,7 +15,6 @@ const idValidator = (id) => {
     return convertedId;
 }
 
-// borrowing this for now..
 function validateStringParams(param, paramName) {
     if (!param) {
         throw `Error: No ${paramName} passed to the function`;
@@ -28,6 +27,20 @@ function validateStringParams(param, paramName) {
     }
 }
 
+const createIndustry = async (name, symbol) => {
+    validateStringParams(name, "name")
+    validateStringParams(symbol, "symbol")
+    let newIndustry = {
+        name: name,
+        symbol: symbol
+    }
+    const industryCollection = await industries();
+    const industryInfo = await industryCollection.insertOne(newIndustry);
+    if (industryInfo.insertedCount === 0) {
+        throw 'Could not add industry';
+    }
+    return 0;
+}
 
 const getIndustry = async (id) => {
     const industryId = idValidator(id);
@@ -52,28 +65,24 @@ const getAllIndustries = async() => {
     return allIndustries;
 }
 
-const createIndustry = async(name, symbol) => {
-    validateStringParams(name);
-    validateStringParams(symbol);
 
-    const symbolTrim = symbol.trim();
-
-    const industryCollection = await industries();
-    const industry = {
-        name: name,
-        symbol: symbolTrim
+const financeAPI = async(symbol) => {
+    validateStringParams(symbol, "symbol")
+    var options = {
+    method: 'GET',
+    url: 'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + symbol,
+    params: {modules: 'defaultKeyStatistics,assetProfile'},
+    headers: {
+        'x-api-key': 'cIbXzdZfgs4mpo8tDVy3S3gbjIELpOYqaNJuYhKn'
     }
-
-    const dbIndustry = await industryCollection.findOne(industry)
-    if (dbIndustry) {
-        throw 'Industry already exists!'
-    }
-    const insertedIndustry = await industryCollection.insertOne(industry);
-    if(insertedIndustry.modifiedCount === 0) {
-        throw "Error: Industry could not be inserted";
-    }
-
-    return insertedIndustry;
+    };
+    let returnVal = 0
+    await axios.request(options).then(function (response2) {
+        returnVal = response2.data
+    }).catch(function (error) {
+        console.error(error);
+    });
+    return returnVal
 }
 
 const fetchStockPrices = async () => {
@@ -95,10 +104,21 @@ const fetchStockPrices = async () => {
     for (const stock of stockData) {
         for (const industry of stocks) {
             if (industry.symbol === stock.symbol) {
-                const lastPrice = stock.ask
+                const lastPrice = stock.regularMarketPrice
                 const lastPriceTime = new Date()
+                const {
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                } = stock
                 const _id = idValidator(industry._id)
-                const updateInfo = await collection.updateOne({_id}, {$set: {lastPrice, lastPriceTime}})
+                const updateInfo = await collection.updateOne({_id}, {$set: {
+                    lastPrice, 
+                    lastPriceTime,
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                }})
                 if (updateInfo.matchedCount === 0) {
                     throw 'Could not find industry with the provided id.'
                 }
@@ -109,14 +129,12 @@ const fetchStockPrices = async () => {
             }
         }
     }
-    console.log('Fetched all stock prices successfully!')
 }
 
 module.exports = {
-    getIndustry,
-    getAllIndustries,
     createIndustry,
+    getIndustry, 
+    getAllIndustries,
+    financeAPI,
     fetchStockPrices
-}
-
-// For deleting and updating, the user's current portfolio would also need to be updated.
+};

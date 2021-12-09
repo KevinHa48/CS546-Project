@@ -13,7 +13,7 @@
     <div class = "grid-container">
 
         <div class = "asset-graph">
-            <h1 id = "total-asset">${{balance}}</h1>
+            <h1 id = "total-asset">${{assets}}</h1>
             <p id = "asset-status">You're up +$100.29 (4.93%) Today!</p>
             <div id = "chartDiv">
                 <canvas id="myChart"></canvas>
@@ -47,7 +47,9 @@
                             {{/each}}
                         {{else}}
                             <tr class= "song-entry">
-                                <h2>No songs purchased.</h2>
+                                 <td class = "song-cell">
+                                    <h2>No songs purchased.</h2>
+                                </td>
                             </tr>
                         {{/if}}
                     </table>
@@ -64,17 +66,17 @@
             <table class = "summary">
                 <tr class = "wallet-row">
                     <td>Total Assets</td>
-                    <td>${{balance}}</td>
+                    <td class = "money-sum">${{assets}}</td>
                 </tr>
                 <tr>
                     <td>Buying Power</td>
-                    <td>${{balance}}</td>
+                    <td class = "money-sum">${{balance}}</td>
                 </tr>
             </table>
             <h3 class = "sb-headers">Shares</h3>
             <hr>
             <table class = "stock-summary">
-               {{#if stocks}}
+               {{#if stocks.length }}
                     {{#each stocks}}
                         <tr class = "wallet-row">
                             <td>
@@ -89,6 +91,7 @@
                             </td>
                             <td>
                                 <p>Shares:{{shares}}</p>
+                                <p class = "change">{{return}}%</p>
                             </td>
                         </tr>
                     {{/each}}
@@ -119,18 +122,18 @@
                                     <p class = "action">{{pos}}</p>
                                 </td>
                                 <td>
-                                    <p>Shares:{{shares}}</p>
+                                    <p class = "rt-additional">Shares: {{shares}}</p>
                                     <p class = "change">${{price}}</p>
                                 </td>
                             </tr>
                         {{else}}
                             <tr class = "wallet-row">
                                 <td>
-                                    <p>{{name}}</p>
-                                    <p>{{artist}}</p>
+                                    <p class = "rt-song-name">{{name}}</p>
+                                    <p class = "action">{{pos}}</p>
                                 </td>
                                 <td>
-                                    <p>{{pos}}</p>
+                                    <p class = "rt-additional">{{artist}}</p>
                                     <p class = "change">${{price}}</p>
                                 </td>
                             </tr>

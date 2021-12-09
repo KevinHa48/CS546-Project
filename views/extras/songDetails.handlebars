@@ -42,4 +42,7 @@
     <img class = "covers"  src = "{{image}}">
     <form id="buy-songs" action="/wallet" method="POST" class="buy-songs">
         <button type="submit">Buy Now</button>
+    {{#if errors}}
+        <p>{{errors}}</p>
+    {{/if}}
 </main>

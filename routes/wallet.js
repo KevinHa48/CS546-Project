@@ -49,7 +49,9 @@ router.get("/", async (req, res) => {
             const {name, symbol, lastPrice} = await industries.getIndustry(
                 stockId
             );
+            console.log(lastPrice);
             const shares = await users.getNumberOfShares(userData._id, stockId);
+            if (shares === 0) continue;
             const price = await users.getAveragePrice(userData._id, stockId);
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
@@ -61,15 +63,17 @@ router.get("/", async (req, res) => {
                 return: ret,
             });
         }
-        console.log(stocks[0]);
-        // songArr to songs?
+
+        const portfolioValues = userData.wallet.portfolioValues;
+
         res.render("extras/wallet", {
             username: userData.firstName,
+            assets: portfolioValues[portfolioValues.length - 1].value,
             time: greeting,
             stocks,
             songs: songArr,
             balance: userData.wallet.balance,
-            portfolioValues: userData.wallet.portfolioValues,
+            portfolioValues: portfolioValues,
             transactions: transactions,
         });
     } catch (e) {
@@ -79,7 +83,41 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.post("/", async (req, res) => {
+// Buying a song
+router.post("/songs/:id", async (req, res) => {
+    try {
+        // Validate the ID
+        // Grab the song data, which will be used for the next function.
+        const songId = users.getObjectId(req.params.id).toString();
+        const songData = await songs.get(songId);
+
+        // Grab the user to extract their ID.
+        const userInfo = await users.getByUsername(req.session.user);
+        const userId = userInfo._id.toString();
+
+        // Call songs transaction
+        await users.addSongTransaction(
+            userId,
+            new Date(),
+            songId,
+            "buy",
+            songData.price
+        );
+        res.redirect("/wallet");
+    } catch (e) {
+        let songData = await songs.get(req.params.id);
+        console.log(songData.price);
+        res.render("extras/songDetails", {
+            title: "Music Details",
+            songs: songData,
+            errors: e,
+        });
+    }
+});
+
+// Buying a stock
+router.post("/stocks/:id", async (req, res) => {
+    console.log(res);
     res.render("extras/wallet", {});
 });
 
@@ -87,7 +125,7 @@ router.get("/portfolio_value", async (req, res) => {
     const username = xss(req.session.user);
     try {
         const user = await users.getByUsername(username);
-        console.log(user);
+        //console.log(user);
         res.json(user.wallet.portfolioValues);
     } catch {
         res.status(500).json({error: "Internal Server Error"});

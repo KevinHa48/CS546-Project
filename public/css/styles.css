@@ -36,7 +36,20 @@ header {
     width: auto;
 }
 
+#market-industries-img{
+    height: 500px;
+    width: auto
+}
+#market-musicRights-img{
+    height: 500px;
+    width: auto
+}
+
 /* Wallet CSS starts here */
+
+.money-sum {
+    text-align: right;
+}
 
 #greeting {
     margin-top: 50px;
@@ -83,8 +96,7 @@ header {
 .summary {
     text-align: left;
     padding: 15px;
-    margin: 0 auto;
-    width: 450px;
+    width: 350px;
     border-spacing: 0 8px;
 }
 
@@ -118,6 +130,16 @@ header {
 
 #no-tra {
     text-align: center;
+}
+
+.rt-song-name {
+    font-weight: bold;
+    padding-bottom: 7.5px;
+}
+
+.rt-additional {
+    text-align: right;
+    width: 150px;
 }
 
 .change {
@@ -217,6 +239,7 @@ figcaption {
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
+    padding-top: 20px;
 }
 
 figure {
@@ -389,3 +412,59 @@ th {
 }
 
 /* Wallet chart css ends here */
+
+/* Industry CSS begins here*/
+
+#industry-home{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+#industry-list ul{
+    list-style: none;
+}
+
+#industry-list ul li{
+    padding-top: 20px;
+    text-decoration: none;
+}
+
+#industry-list ul a:link { text-decoration: none; color: blue}
+#industry-list ul a:visited { text-decoration: none; color: blue}
+#industry-list ul a:hover { text-decoration: none; color: #6fdd8e}
+#industry-list ul a:active { text-decoration: none; color: blue}
+
+#stock-body{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#stock-info ul{
+    list-style: none;
+    padding-left: 5px;
+}
+
+#stock-info ul li{
+    padding-top: 20px;
+}
+
+.tradingview-widget-stock{
+    padding-right: 5px;
+}
+
+#stock-form-contents{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#stock-form-contents *{
+    padding-bottom: 5px;
+}
