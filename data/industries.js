@@ -86,11 +86,56 @@ const financeAPI = async(symbol) => {
     return returnVal
 }
 
-// For deleting and updating, the user's current portfolio would also need to be updated.
+const fetchStockPrices = async () => {
+    const stocks = await getAllIndustries()
+    const tickers = stocks.map(industry => industry.symbol)
+    if (tickers.length === 0) {
+        throw 'No industries found!'
+    }
+    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
+        params: {
+            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
+        },
+        headers: {
+            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
+        }
+    })
+    const stockData = response.data.quoteResponse.result
+    const collection = await industries()
+    for (const stock of stockData) {
+        for (const industry of stocks) {
+            if (industry.symbol === stock.symbol) {
+                const lastPrice = stock.regularMarketPrice
+                const lastPriceTime = new Date()
+                const {
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                } = stock
+                const _id = idValidator(industry._id)
+                const updateInfo = await collection.updateOne({_id}, {$set: {
+                    lastPrice, 
+                    lastPriceTime,
+                    regularMarketDayLow,
+                    regularMarketDayHigh,
+                    fiftyDayAverage
+                }})
+                if (updateInfo.matchedCount === 0) {
+                    throw 'Could not find industry with the provided id.'
+                }
+                if (updateInfo.modifiedCount === 0) {
+                    throw 'Failed to update stock price.'
+                }
+                break
+            }
+        }
+    }
+}
 
 module.exports = {
     createIndustry,
     getIndustry, 
     getAllIndustries,
-    financeAPI
+    financeAPI,
+    fetchStockPrices
 };
