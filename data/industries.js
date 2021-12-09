@@ -1,5 +1,6 @@
 const {industries} = require("../config/mongoCollection");
 const {ObjectId} = require("mongodb");
+const axios = require('axios')
 
 // Industry names will be provided from an API.
 // These functions will only be displayed in Admin view.
@@ -63,6 +64,10 @@ const createIndustry = async(name, symbol) => {
         symbol: symbolTrim
     }
 
+    const dbIndustry = await industryCollection.findOne(industry)
+    if (dbIndustry) {
+        throw 'Industry already exists!'
+    }
     const insertedIndustry = await industryCollection.insertOne(industry);
     if(insertedIndustry.modifiedCount === 0) {
         throw "Error: Industry could not be inserted";
@@ -71,10 +76,47 @@ const createIndustry = async(name, symbol) => {
     return insertedIndustry;
 }
 
+const fetchStockPrices = async () => {
+    const stocks = await getAllIndustries()
+    const tickers = stocks.map(industry => industry.symbol)
+    if (tickers.length === 0) {
+        throw 'No industries found!'
+    }
+    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
+        params: {
+            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
+        },
+        headers: {
+            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
+        }
+    })
+    const stockData = response.data.quoteResponse.result
+    const collection = await industries()
+    for (const stock of stockData) {
+        for (const industry of stocks) {
+            if (industry.symbol === stock.symbol) {
+                const lastPrice = stock.ask
+                const lastPriceTime = new Date()
+                const _id = idValidator(industry._id)
+                const updateInfo = await collection.updateOne({_id}, {$set: {lastPrice, lastPriceTime}})
+                if (updateInfo.matchedCount === 0) {
+                    throw 'Could not find industry with the provided id.'
+                }
+                if (updateInfo.modifiedCount === 0) {
+                    throw 'Failed to update stock price.'
+                }
+                break
+            }
+        }
+    }
+    console.log('Fetched all stock prices successfully!')
+}
+
 module.exports = {
     getIndustry,
     getAllIndustries,
-    createIndustry
+    createIndustry,
+    fetchStockPrices
 }
 
 // For deleting and updating, the user's current portfolio would also need to be updated.

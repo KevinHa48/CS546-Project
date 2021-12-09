@@ -53,6 +53,21 @@ const getByUsername = async username => {
     username = username.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({username})
+    if (!user) {
+        throw 'No user was found with the provided username.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -63,6 +78,21 @@ const getByEmail = async email => {
     email = email.toLowerCase()
     const collection = await users()
     const user = collection.findOne({email})
+    if (!user) {
+        throw 'No user was found with the provided email.'
+    }
+    // displaying all the ObjectIds as strings.
+    user._id = user._id.toString()
+    for (holdingType of Object.keys(user.wallet.holdings)) {
+        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+    }
+    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+        return {
+            ...transaction,
+            _id: transaction._id.toString(),
+            _itemId: transaction._itemId.toString()
+        }
+    })
     return user
 }
 
@@ -87,6 +117,26 @@ const getById = async id => {
         }
     })
     return user
+}
+
+const getAll = async () => {
+    const collection = await users()
+    let result = await collection.find().toArray()
+    result = result.map(user => {
+        user._id = user._id.toString()
+        for (holdingType of Object.keys(user.wallet.holdings)) {
+            user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        }
+        user.wallet.transactions = user.wallet.transactions.map(transaction => {
+            return {
+                ...transaction,
+                _id: transaction._id.toString(),
+                _itemId: transaction._itemId.toString()
+            }
+        }) 
+        return user
+    })
+    return result
 }
 
 const create = async (firstName, lastName, email, age, username, password) => {
@@ -180,38 +230,34 @@ const getNumberOfShares = async (userId, stockId) => {
         .reduce((a, b) => a + b, 0)
 }
 
+const getAveragePrice = async (userId, stockId) => {
+    const _userId = getObjectId(userId)
+    const _stockId = getObjectId(stockId)
+    const user = await getById(userId)
+    const totalShares = await getNumberOfShares(userId, stockId)
+    let {transactions} = user.wallet
+    transactions = transactions.filter(transaction => transaction._itemId === stockId)
+    if (totalShares === 0) {
+        throw 'User does not own any of this stock.'
+    }
+    let count = totalShares // decrement as
+    let averagePrice = 0.0
+    for (let i = transactions.length - 1; i >= 0 && count > 0; --i) {
+        const {shares, price} = transactions[i]
+        averagePrice += price * shares / totalShares
+        count -= shares
+    }
+    return averagePrice
+}
+
 const calculatePortfolioValue = async (userId) => {
     const _userId = getObjectId(userId)
     let user = await getById(userId)
     const industries = await getAllIndustries()
-    const tickers = industries.map(document => document.symbol)
-    if (tickers.length === 0) {
-        throw 'No tickers provided!'
-    }
-    console.log(tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, ''));
-    const response = await axios.get('https://yfapi.net/v6/finance/quote', {
-        params: {
-            symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
-        },
-        headers: {
-            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
-        }
-    })
-    const prices = response.data.quoteResponse.result
-    console.log(prices);
     let value = 0.0
-    for (const price of prices) {
-        const {symbol, ask} = price
-        for (const industry of industries) {
-            if (industry.symbol === symbol) {
-                // await was missing here
-                const shares = await getNumberOfShares(userId, industry._id)
-                console.log(ask*shares);
-                // Changed to +=
-                value += ask * shares
-                break
-            }
-        }
+    for (const industry of industries) {
+        const shares = await getNumberOfShares(userId, industry._id)
+        value += shares * industry.lastPrice
     }
     // Force to two decimal places, and do not round.
     value = Math.trunc(value*100)/100;
@@ -357,8 +403,10 @@ module.exports = {
     getByUsername,
     getByEmail,
     getById,
+    getAll,
     create,
     getNumberOfShares,
+    getAveragePrice,
     addBalance,
     addStockTransaction,
     addSongTransaction,
