@@ -111,11 +111,17 @@ header {
     padding-bottom: 7.5px;
 }
 
+.action {
+    text-transform: uppercase;
+    color:rgb(136, 136, 115)
+}
 
-
+#no-tra {
+    text-align: center;
+}
 
 .change {
-    color: red;
+    color: green;
     margin-top: 7.5px;
     text-align: right;
 }

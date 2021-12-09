@@ -262,7 +262,7 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
     const transaction = {
         _id: new ObjectId(),
         datetime,
-        type: "stock",
+        type: 1,
         _itemId: _stockId,
         price,
         shares,
@@ -313,7 +313,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     const transaction = {
         _id: new ObjectId(),
         datetime,
-        type: "song",
+        type: 0,
         _itemId: _songId,
         price,
         pos
