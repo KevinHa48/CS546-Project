@@ -117,8 +117,67 @@ router.post('/songs/:id', async (req, res) => {
 
 // Buying a stock
 router.post('/stocks/:id', async (req, res) => {
-    console.log(res);
-    res.render('extras/wallet', {});
+    let formData = req.body;
+    let errors = []
+    //Error Check
+    if(!formData.shares){
+        errors.push("No Input for Shares")
+    }
+    let numShares = parseInt(formData.shares)
+    if (typeof numShares !== 'number') {
+        throw 'Error: Not a Number';
+    }
+    if (isNaN(numShares)) {
+        throw 'Error: Not a Number';
+    }
+    //Query Database for current price
+    const stockId = await users.getObjectId(req.params.id).toString();
+    let ind = await industries.getIndustry(stockId);
+    if(!ind){
+        res.render('extras/market', {
+        })
+    }
+    try {
+        // Grab the user to extract their ID.
+        const userInfo = await users.getByUsername(req.session.user);
+        const userId = userInfo._id.toString();
+        // Call songs transaction
+        try{
+            await users.addStockTransaction(
+                userId,
+                new Date(),
+                req.params.id,
+                'buy',
+                ind.lastPrice,
+                numShares
+            );
+        }
+        catch(e){
+            res.render('extras/stock', {
+                name: ind.name,
+                id: req.params.id,
+                symbol: ind.symbol,
+                fiftyDayAverage: ind.fiftyDayAverage,
+                regularMarketPrice: ind.lastPrice,
+                regularMarketDayHigh: ind.regularMarketDayHigh,
+                regularMarketDayLow: ind.regularMarketDayLow,
+                errors: errors
+            })
+        }
+        res.redirect('/wallet');
+        return
+    } catch (e) {
+        res.render('extras/stock', {
+            name: ind.name,
+            id: req.params.id,
+            symbol: ind.symbol,
+            fiftyDayAverage: ind.fiftyDayAverage,
+            regularMarketPrice: ind.lastPrice,
+            regularMarketDayHigh: ind.regularMarketDayHigh,
+            regularMarketDayLow: ind.regularMarketDayLow,
+            errors: errors
+        })
+    }
 });
 
 router.get('/portfolio_value', async (req, res) => {
