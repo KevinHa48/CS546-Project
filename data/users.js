@@ -1,174 +1,206 @@
-const {users} = require('../config/mongoCollection')
-const {getIndustry, getAllIndustries} = require('./industries')
-const {ObjectId} = require('mongodb')
-const axios = require('axios')
-const bcrypt = require('bcryptjs')
-const saltRounds = 16
+const {users} = require('../config/mongoCollection');
+const {getIndustry, getAllIndustries} = require('./industries');
+const {ObjectId} = require('mongodb');
+const axios = require('axios');
+const bcrypt = require('bcryptjs');
+const saltRounds = 16;
+const {songs} = require('../config/mongoCollection');
+const songsData = require('./songs');
 
-const validEmail = email => {
+const validEmail = (email) => {
     // more thorough type checking for emails.
     if (typeof email !== 'string') {
-        return false
+        return false;
     }
-    const [username, website] = email.split('@')
+    const [username, website] = email.split('@');
     if (!username || !website) {
-        return false
+        return false;
     }
-    const [domain, tld] = website.split('.')
+    const [domain, tld] = website.split('.');
     if (!domain || !tld) {
-        return false
+        return false;
     }
-    if (username.length === 0 || username.match('[^A-Za-z0-9\.]+')) {
-        return false
+    if (username.length === 0 || username.match('[^A-Za-z0-9.]+')) {
+        return false;
     }
-    if (domain.length === 0 || domain.match('[^A-Za-z0-9\-]+')) {
-        return false
+    if (domain.length === 0 || domain.match('[^A-Za-z0-9-]+')) {
+        return false;
     }
-    if (tld.length === 0 || tld.match('[^A-Za-z0-9\-]+')) {
-        return false
+    if (tld.length === 0 || tld.match('[^A-Za-z0-9-]+')) {
+        return false;
     }
-    return true
-}
+    return true;
+};
 
-const getObjectId = id => {
+const getObjectId = (id) => {
     if (typeof id !== 'string') {
-        throw 'Provided id is not a string.'
+        throw 'Provided id is not a string.';
     }
-    let _id
+    let _id;
     try {
-        _id = ObjectId(id)
+        _id = ObjectId(id);
     } catch {
-        throw 'Provided id is not a valid ObjectId.'
+        throw 'Provided id is not a valid ObjectId.';
     }
-    return _id
-}
+    return _id;
+};
 
-const getByUsername = async username => {
+const getByUsername = async (username) => {
     /* checking that a user with the provided username does not already exist
        before creating document. Password is optional argument to verify that
        user has that password. It should be hashed when passed in. */
-    if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
-        throw 'Username must be at least 4 characters long and can only contain letters and numbers.'
+    if (
+        typeof username !== 'string' ||
+        username.trim().length < 4 ||
+        username.match('[^A-Za-z0-9]+')
+    ) {
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.';
     }
-    username = username.toLowerCase()
-    const collection = await users()
-    const user = await collection.findOne({username})
+    username = username.toLowerCase();
+    const collection = await users();
+    const user = await collection.findOne({username});
     if (!user) {
-        throw 'No user was found with the provided username.'
+        throw 'No user was found with the provided username.';
     }
     // displaying all the ObjectIds as strings.
-    user._id = user._id.toString()
+    user._id = user._id.toString();
     for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        user.wallet.holdings[holdingType] = user.wallet.holdings[
+            holdingType
+        ].map((holding) => holding.toString());
     }
-    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
         return {
             ...transaction,
             _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString()
-        }
-    })
-    return user
-}
+            _itemId: transaction._itemId.toString(),
+        };
+    });
+    return user;
+};
 
-const getByEmail = async email => {
+const getByEmail = async (email) => {
     if (!validEmail(email)) {
-        throw 'Provided email is invalid.'
+        throw 'Provided email is invalid.';
     }
-    email = email.toLowerCase()
-    const collection = await users()
-    const user = collection.findOne({email})
+    email = email.toLowerCase();
+    const collection = await users();
+    const user = collection.findOne({email});
     if (!user) {
-        throw 'No user was found with the provided email.'
+        throw 'No user was found with the provided email.';
     }
     // displaying all the ObjectIds as strings.
-    user._id = user._id.toString()
+    user._id = user._id.toString();
     for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        user.wallet.holdings[holdingType] = user.wallet.holdings[
+            holdingType
+        ].map((holding) => holding.toString());
     }
-    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
         return {
             ...transaction,
             _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString()
-        }
-    })
-    return user
-}
+            _itemId: transaction._itemId.toString(),
+        };
+    });
+    return user;
+};
 
-const getById = async id => {
+const getById = async (id) => {
     // return document of user with provided id.
-    const _id = getObjectId(id)
-    const collection = await users()
-    let user = await collection.findOne({_id})
+    const _id = getObjectId(id);
+    const collection = await users();
+    let user = await collection.findOne({_id});
     if (!user) {
-        throw 'No user was found with the provided id.'
+        throw 'No user was found with the provided id.';
     }
     // displaying all the ObjectIds as strings.
-    user._id = user._id.toString()
+    user._id = user._id.toString();
     for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+        user.wallet.holdings[holdingType] = user.wallet.holdings[
+            holdingType
+        ].map((holding) => holding.toString());
     }
-    user.wallet.transactions = user.wallet.transactions.map(transaction => {
+    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
         return {
             ...transaction,
             _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString()
-        }
-    })
-    return user
-}
+            _itemId: transaction._itemId.toString(),
+        };
+    });
+    return user;
+};
 
 const getAll = async () => {
-    const collection = await users()
-    let result = await collection.find().toArray()
-    result = result.map(user => {
-        user._id = user._id.toString()
+    const collection = await users();
+    let result = await collection.find().toArray();
+    result = result.map((user) => {
+        user._id = user._id.toString();
         for (holdingType of Object.keys(user.wallet.holdings)) {
-            user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
+            user.wallet.holdings[holdingType] = user.wallet.holdings[
+                holdingType
+            ].map((holding) => holding.toString());
         }
-        user.wallet.transactions = user.wallet.transactions.map(transaction => {
-            return {
-                ...transaction,
-                _id: transaction._id.toString(),
-                _itemId: transaction._itemId.toString()
+        user.wallet.transactions = user.wallet.transactions.map(
+            (transaction) => {
+                return {
+                    ...transaction,
+                    _id: transaction._id.toString(),
+                    _itemId: transaction._itemId.toString(),
+                };
             }
-        }) 
-        return user
-    })
-    return result
-}
+        );
+        return user;
+    });
+    return result;
+};
 
 const create = async (firstName, lastName, email, age, username, password) => {
     /* this method should run whenever someone creates a new account. password 
        should be hashed when passed in. */
-    if (typeof firstName !== 'string' || firstName.trim().length === 0 || firstName.match('[^A-Za-z]+')) {
-        throw 'First name can only contain letters.'
+    if (
+        typeof firstName !== 'string' ||
+        firstName.trim().length === 0 ||
+        firstName.match('[^A-Za-z]+')
+    ) {
+        throw 'First name can only contain letters.';
     }
-    if (typeof lastName !== 'string' || lastName.trim().length === 0 || lastName.match('[^A-Za-z]+')) {
-        throw 'Last name can only contain letters.'
+    if (
+        typeof lastName !== 'string' ||
+        lastName.trim().length === 0 ||
+        lastName.match('[^A-Za-z]+')
+    ) {
+        throw 'Last name can only contain letters.';
     }
     if (typeof age !== 'number' || age < 18) {
-        throw 'User must be at least 18 years old.'
+        throw 'User must be at least 18 years old.';
     }
     if (!validEmail(email)) {
-        throw 'Email is not valid.'
+        throw 'Email is not valid.';
     }
-    if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
-        throw 'Username must be at least 4 characters long and can only contain letters and numbers.'
+    if (
+        typeof username !== 'string' ||
+        username.trim().length < 4 ||
+        username.match('[^A-Za-z0-9]+')
+    ) {
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.';
     }
-    let user = await getByUsername(username)
+    let user = await getByUsername(username);
     if (user) {
-        throw 'Provided username is unavailable.'
+        throw 'Provided username is unavailable.';
     }
-    if (typeof password !== 'string' || password.trim().length < 8 || password.match('[ ]+')) {
-        throw 'Password must be at least 8 characters long and cannot contain spaces.'
+    if (
+        typeof password !== 'string' ||
+        password.trim().length < 8 ||
+        password.match('[ ]+')
+    ) {
+        throw 'Password must be at least 8 characters long and cannot contain spaces.';
     }
-    const hash = await bcrypt.hash(password, saltRounds)
-    const collection = await users()
-    user = await getByEmail(email)
+    const hash = await bcrypt.hash(password, saltRounds);
+    const collection = await users();
+    user = await getByEmail(email);
     if (user) {
-        throw 'Email is already taken.'
+        throw 'Email is already taken.';
     }
 
     const date = new Date();
@@ -182,128 +214,146 @@ const create = async (firstName, lastName, email, age, username, password) => {
         wallet: {
             holdings: {
                 stocks: [],
-                songs: []
+                songs: [],
             },
             balance: 0.0,
             portfolioValues: [
                 {
-                    date: date.toDateString(), 
-                    value: 0
-                }
+                    date: date.toDateString(),
+                    value: 0,
+                },
             ],
-            transactions: []
-        }
-    })
+            transactions: [],
+        },
+    });
 
     const result = await getById(insertedId.toString());
-    return result
-}
+    return result;
+};
 
 const addBalance = async (id, amt) => {
     // add to the balance of a user.
-    const _id = getObjectId(id)
+    const _id = getObjectId(id);
     if (typeof amt !== 'number' || amt <= 0) {
-        throw 'Added amount must be a number greater than 0.'
+        throw 'Added amount must be a number greater than 0.';
     }
-    const collection = await users()
-    const updateInfo = await collection.updateOne({_id}, {$inc: {'wallet.balance': amt}})
+    const collection = await users();
+    const updateInfo = await collection.updateOne(
+        {_id},
+        {$inc: {'wallet.balance': amt}}
+    );
     if (updateInfo.matchedCount === 0) {
-        throw 'User not found with the provided id.'
+        throw 'User not found with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update balance for user.'
+        throw 'Failed to update balance for user.';
     }
-    const user = await getById(id)
-    return user
-}
+    const user = await getById(id);
+    return user;
+};
 
 const getNumberOfShares = async (userId, stockId) => {
     // calculates the total number of shares a user has of a particular stock.
-    const _userId = getObjectId(userId)
-    const _stockId = getObjectId(stockId)
-    const user = await getById(userId)
-    const industry = await getIndustry(stockId)
-    const {transactions} = user.wallet
+    const _userId = getObjectId(userId);
+    const _stockId = getObjectId(stockId);
+    const user = await getById(userId);
+    const industry = await getIndustry(stockId);
+    const {transactions} = user.wallet;
     return transactions
-        .filter(transaction => transaction._itemId === stockId)
-        .map(transaction => transaction.shares * (transaction.pos === 'buy' ? 1 : -1))
-        .reduce((a, b) => a + b, 0)
-}
+        .filter((transaction) => transaction._itemId === stockId)
+        .map(
+            (transaction) =>
+                transaction.shares * (transaction.pos === 'buy' ? 1 : -1)
+        )
+        .reduce((a, b) => a + b, 0);
+};
 
 const getAveragePrice = async (userId, stockId) => {
-    const _userId = getObjectId(userId)
-    const _stockId = getObjectId(stockId)
-    const user = await getById(userId)
-    const totalShares = await getNumberOfShares(userId, stockId)
-    let {transactions} = user.wallet
-    transactions = transactions.filter(transaction => transaction._itemId === stockId)
+    const _userId = getObjectId(userId);
+    const _stockId = getObjectId(stockId);
+    const user = await getById(userId);
+    const totalShares = await getNumberOfShares(userId, stockId);
+    let {transactions} = user.wallet;
+    transactions = transactions.filter(
+        (transaction) => transaction._itemId === stockId
+    );
     if (totalShares === 0) {
-        throw 'User does not own any of this stock.'
+        throw 'User does not own any of this stock.';
     }
-    let count = totalShares // decrement as
-    let averagePrice = 0.0
+    let count = totalShares; // decrement as
+    let averagePrice = 0.0;
     for (let i = transactions.length - 1; i >= 0 && count > 0; --i) {
-        const {shares, price} = transactions[i]
-        averagePrice += price * shares / totalShares
-        count -= shares
+        const {shares, price} = transactions[i];
+        averagePrice += (price * shares) / totalShares;
+        count -= shares;
     }
-    return averagePrice
-}
+    return averagePrice;
+};
 
 const calculatePortfolioValue = async (userId) => {
-    const _userId = getObjectId(userId)
-    let user = await getById(userId)
-    const industries = await getAllIndustries()
-    let value = 0.0
+    const _userId = getObjectId(userId);
+    let user = await getById(userId);
+    const industries = await getAllIndustries();
+    let value = 0.0;
     for (const industry of industries) {
-        const shares = await getNumberOfShares(userId, industry._id)
-        value += shares * industry.lastPrice
+        const shares = await getNumberOfShares(userId, industry._id);
+        value += shares * industry.lastPrice;
     }
     // Force to two decimal places, and do not round.
-    value = Math.trunc(value*100)/100 + user.balance;
-    
-    const date = new Date()
-    const collection = await users()
-   
-    const updateInfo = await collection.updateOne({_id: _userId}, {
-        $push: {
-            'wallet.portfolioValues': {
-                date: date.toDateString(), 
-                value
-            }
-        }
-    })
-    user = await getById(userId)
-    return user.wallet.portfolioValues
-}
+    value = Math.trunc(value * 100) / 100 + user.balance;
 
-const addStockTransaction = async (userId, datetime, stockId, pos, price, shares) => {
+    const date = new Date();
+    const collection = await users();
+
+    const updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {
+            $push: {
+                'wallet.portfolioValues': {
+                    date: date.toDateString(),
+                    value,
+                },
+            },
+        }
+    );
+    user = await getById(userId);
+    return user.wallet.portfolioValues;
+};
+
+const addStockTransaction = async (
+    userId,
+    datetime,
+    stockId,
+    pos,
+    price,
+    shares
+) => {
     /* this will add a stock transaction to the transactions array for the user.
        the only difference is that this subdocument will include a shares key.
        this will also update holdings (e.g. they buy a new stock or they sell out of
        one completely) as well as balance. as a side note: another function. */
-    const _userId = getObjectId(userId)
-    const _stockId = getObjectId(stockId)
+    const _userId = getObjectId(userId);
+    const _stockId = getObjectId(stockId);
     if (!(datetime instanceof Date)) {
-        throw 'Must provide a valid Date object.'
+        throw 'Must provide a valid Date object.';
     }
     if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
-        throw 'Pos must either be "buy" or "sell".'
+        throw 'Pos must either be "buy" or "sell".';
     }
     if (typeof price !== 'number' || price <= 0) {
-        throw 'Price must be a number greater than 0.'
+        throw 'Price must be a number greater than 0.';
     }
     if (typeof shares !== 'number' || shares <= 0) {
-        throw 'Shares must be a number greater than 0.'
+        throw 'Shares must be a number greater than 0.';
     }
-    const user = await getById(userId)
+    const user = await getById(userId);
     if (price * shares > user.wallet.balance) {
-        throw 'User does not have enough money to make this transaction.'
+        throw 'User does not have enough money to make this transaction.';
     }
-    const oldShareAmount = await getNumberOfShares(userId, stockId)
-    const newShareAmount = oldShareAmount + shares
+    const oldShareAmount = await getNumberOfShares(userId, stockId);
+    const newShareAmount = oldShareAmount + shares;
     if (newShareAmount < 0) {
-        throw 'User cannot sell more shares than they own.'
+        throw 'User cannot sell more shares than they own.';
     }
     const transaction = {
         _id: new ObjectId(),
@@ -312,52 +362,68 @@ const addStockTransaction = async (userId, datetime, stockId, pos, price, shares
         _itemId: _stockId,
         price,
         shares,
-        pos
-    }
-    const collection = await users()
-    let updateInfo = await collection.updateOne({_id: _userId}, {
-        $push: {'wallet.transactions': transaction},
-        $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
-    })
+        pos,
+    };
+    const collection = await users();
+    let updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
+        }
+    );
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user transactions history and balance after transaction.'
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
     if (oldShareAmount === 0) {
-        updateInfo = await collection.updateOne({_id: _userId}, {$push: {'wallet.holdings.stocks': _stockId}})
+        updateInfo = await collection.updateOne(
+            {_id: _userId},
+            {$push: {'wallet.holdings.stocks': _stockId}}
+        );
     } else if (newShareAmount === 0) {
-        updateInfo = await collection.updateOne({_id: _userId}, {$pull: {'wallet.holdings.stocks': _stockId}})
+        updateInfo = await collection.updateOne(
+            {_id: _userId},
+            {$pull: {'wallet.holdings.stocks': _stockId}}
+        );
     }
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user holdings after transaction.'
+        throw 'Failed to update user holdings after transaction.';
     }
-    const result = await getById(userId)
-    return result
-}
+    const result = await getById(userId);
+    return result;
+};
 
-const sellStockTransaction = async (userId, datetime, stockId, pos, price, sharesToSell) => {
-    const _userId = getObjectId(userId)
-    const _stockId = getObjectId(stockId)
+const sellStockTransaction = async (
+    userId,
+    datetime,
+    stockId,
+    pos,
+    price,
+    sharesToSell
+) => {
+    const _userId = getObjectId(userId);
+    const _stockId = getObjectId(stockId);
     if (!(datetime instanceof Date)) {
-        throw 'Must provide a valid Date object.'
+        throw 'Must provide a valid Date object.';
     }
     if (typeof pos !== 'string' || pos !== 'sell') {
-        throw 'Pos must be "sell".'
+        throw 'Pos must be "sell".';
     }
     if (typeof price !== 'number' || price <= 0) {
-        throw 'Price must be a number greater than 0.'
+        throw 'Price must be a number greater than 0.';
     }
     if (typeof sharesToSell !== 'number' || sharesToSell <= 0) {
-        throw 'Shares must be a number greater than 0.'
+        throw 'Shares must be a number greater than 0.';
     }
-    const numShares = await getNumberOfShares(userId, stockId)
-    if(numShares < sharesToSell){
-        throw 'Error: Cannot sell more shares than owned'
+    const numShares = await getNumberOfShares(userId, stockId);
+    if (numShares < sharesToSell) {
+        throw 'Error: Cannot sell more shares than owned';
     }
     const transaction = {
         _id: new ObjectId(),
@@ -366,88 +432,133 @@ const sellStockTransaction = async (userId, datetime, stockId, pos, price, share
         _itemId: _stockId,
         price,
         shares,
-        pos
-    }
-    const collection = await users()
-    let updateInfo = await collection.updateOne({_id: _userId}, {
-        $push: {'wallet.transactions': transaction},
-        $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
-    })
+        pos,
+    };
+    const collection = await users();
+    let updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
+        }
+    );
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user transactions history and balance after transaction.'
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
-    updateInfo = await collection.updateOne({_id: _userId}, {$pull: {'wallet.holdings.stocks': _stockId}})
+    updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {$pull: {'wallet.holdings.stocks': _stockId}}
+    );
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user transactions history and balance after transaction.'
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
-    const result = await getById(userId)
-    return result
-}
+    const result = await getById(userId);
+    return result;
+};
 
 const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     /* this will add a stock transaction to the transactions array for the user.
        the only difference is that this subdocument will include a shares key.
        this will also update holdings (e.g. they buy a new stock or they sell out of
        one completely) as well as balance. as a side note: another function. */
-    const _userId = getObjectId(userId)
-    const _songId = getObjectId(songId)
+    const _userId = getObjectId(userId);
+    const _songId = getObjectId(songId);
     if (!(datetime instanceof Date)) {
-        throw 'Must provide a valid Date object.'
+        throw 'Must provide a valid Date object.';
     }
     if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
-        throw 'Position must either be "buy" or "sell".'
+        throw 'Position must either be "buy" or "sell".';
     }
     if (typeof price !== 'number' || price <= 0) {
-        throw 'Price must be a number greater than 0.'
+        throw 'Price must be a number greater than 0.';
     }
+    const songDetails = await songsData.get(songId);
+    if (pos === 'buy' && songDetails.currentlyAvailable === false) {
+        throw 'Sorry song cannot be bought.It is already sold out';
+    }
+
+    if (pos === 'sell' && songDetails.currentlyAvailable === true) {
+        throw 'Sorry song cannot be sold.It has already been sold';
+    }
+
     const transaction = {
         _id: new ObjectId(),
         datetime,
         type: 0,
         _itemId: _songId,
         price,
-        pos
-    }
-    const user = await getById(userId)
+        pos,
+    };
+    const user = await getById(userId);
     if (pos === 'buy' && user.wallet.balance < price) {
-        throw 'User cannot afford to buy the rights to this music.'
+        throw 'User cannot afford to buy the rights to this music.';
     }
     if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
-        throw 'User does not own the rights to the music that they are trying to sell.'
+        throw 'User does not own the rights to the music that they are trying to sell.';
     }
 
-    const collection = await users()
-    let updateInfo = await collection.updateOne({_id: _userId}, {
-        $push: {'wallet.transactions': transaction},
-        $inc: {'wallet.balance': price * (pos === 'buy' ? -1 : 1)},
-    })
+    const collection = await users();
+    let updateInfo = await collection.updateOne(
+        {_id: _userId},
+        {
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * (pos === 'buy' ? -1 : 1)},
+        }
+    );
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user transactions history and balance after transaction.'
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
+    const songsCollection = await songs();
 
+    let currAvailabilityFlag = false;
+    if (pos === 'sell') {
+        currAvailabilityFlag = true;
+    }
+    const updateSongInfo = {
+        currentlyAvailable: currAvailabilityFlag,
+    };
+    let updatedSongInfo = '';
     if (pos === 'buy') {
-        updateInfo = await collection.updateOne({_id: _userId}, {$push: {'wallet.holdings.songs': _songId}})
+        updateInfo = await collection.updateOne(
+            {_id: _userId},
+            {$push: {'wallet.holdings.songs': _songId}}
+        );
+        updatedSongInfo = await songsCollection.updateOne(
+            {_id: _songId},
+            {$set: updateSongInfo}
+        );
     } else {
-        updateInfo = await collection.updateOne({_id: _userId}, {$pull: {'wallet.holdings.songs': _songId}})
+        updateInfo = await collection.updateOne(
+            {_id: _userId},
+            {$pull: {'wallet.holdings.songs': _songId}}
+        );
+        updatedSongInfo = await songsCollection.updateOne(
+            {_id: _songId},
+            {$set: updateSongInfo}
+        );
     }
     if (updateInfo.matchedCount === 0) {
-        throw 'Could not find user with the provided id.'
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw 'Failed to update user holdings after transaction.'
+        throw 'Failed to update user holdings after transaction.';
     }
-    const result = await getById(userId)
-    return result
-}
+
+    if (updatedSongInfo.modifiedCount === 0) {
+        throw 'Failed to update song availability after transaction.';
+    }
+    const result = await getById(userId);
+    return result;
+};
 
 module.exports = {
     getObjectId,
@@ -463,5 +574,5 @@ module.exports = {
     addStockTransaction,
     sellStockTransaction,
     addSongTransaction,
-    calculatePortfolioValue
-}
+    calculatePortfolioValue,
+};
