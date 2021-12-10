@@ -1,46 +1,46 @@
-const {users} = require("../config/mongoCollection");
-const {getIndustry, getAllIndustries} = require("./industries");
-const {ObjectId} = require("mongodb");
-const axios = require("axios");
-const bcrypt = require("bcryptjs");
+const {users} = require('../config/mongoCollection');
+const {getIndustry, getAllIndustries} = require('./industries');
+const {ObjectId} = require('mongodb');
+const axios = require('axios');
+const bcrypt = require('bcryptjs');
 const saltRounds = 16;
-const {songs} = require("../config/mongoCollection");
-const songsData = require("./songs");
+const {songs} = require('../config/mongoCollection');
+const songsData = require('./songs');
 
 const validEmail = (email) => {
     // more thorough type checking for emails.
-    if (typeof email !== "string") {
+    if (typeof email !== 'string') {
         return false;
     }
-    const [username, website] = email.split("@");
+    const [username, website] = email.split('@');
     if (!username || !website) {
         return false;
     }
-    const [domain, tld] = website.split(".");
+    const [domain, tld] = website.split('.');
     if (!domain || !tld) {
         return false;
     }
-    if (username.length === 0 || username.match("[^A-Za-z0-9.]+")) {
+    if (username.length === 0 || username.match('[^A-Za-z0-9.]+')) {
         return false;
     }
-    if (domain.length === 0 || domain.match("[^A-Za-z0-9-]+")) {
+    if (domain.length === 0 || domain.match('[^A-Za-z0-9-]+')) {
         return false;
     }
-    if (tld.length === 0 || tld.match("[^A-Za-z0-9-]+")) {
+    if (tld.length === 0 || tld.match('[^A-Za-z0-9-]+')) {
         return false;
     }
     return true;
 };
 
 const getObjectId = (id) => {
-    if (typeof id !== "string") {
-        throw "Provided id is not a string.";
+    if (typeof id !== 'string') {
+        throw 'Provided id is not a string.';
     }
     let _id;
     try {
         _id = ObjectId(id);
     } catch {
-        throw "Provided id is not a valid ObjectId.";
+        throw 'Provided id is not a valid ObjectId.';
     }
     return _id;
 };
@@ -50,17 +50,17 @@ const getByUsername = async (username) => {
        before creating document. Password is optional argument to verify that
        user has that password. It should be hashed when passed in. */
     if (
-        typeof username !== "string" ||
+        typeof username !== 'string' ||
         username.trim().length < 4 ||
-        username.match("[^A-Za-z0-9]+")
+        username.match('[^A-Za-z0-9]+')
     ) {
-        throw "Username must be at least 4 characters long and can only contain letters and numbers.";
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.';
     }
     username = username.toLowerCase();
     const collection = await users();
     const user = await collection.findOne({username});
     if (!user) {
-        throw "No user was found with the provided username.";
+        throw 'No user was found with the provided username.';
     }
     // displaying all the ObjectIds as strings.
     user._id = user._id.toString();
@@ -81,13 +81,13 @@ const getByUsername = async (username) => {
 
 const getByEmail = async (email) => {
     if (!validEmail(email)) {
-        throw "Provided email is invalid.";
+        throw 'Provided email is invalid.';
     }
     email = email.toLowerCase();
     const collection = await users();
     const user = collection.findOne({email});
     if (!user) {
-        throw "No user was found with the provided email.";
+        throw 'No user was found with the provided email.';
     }
     // displaying all the ObjectIds as strings.
     user._id = user._id.toString();
@@ -112,7 +112,7 @@ const getById = async (id) => {
     const collection = await users();
     let user = await collection.findOne({_id});
     if (!user) {
-        throw "No user was found with the provided id.";
+        throw 'No user was found with the provided id.';
     }
     // displaying all the ObjectIds as strings.
     user._id = user._id.toString();
@@ -159,48 +159,48 @@ const create = async (firstName, lastName, email, age, username, password) => {
     /* this method should run whenever someone creates a new account. password 
        should be hashed when passed in. */
     if (
-        typeof firstName !== "string" ||
+        typeof firstName !== 'string' ||
         firstName.trim().length === 0 ||
-        firstName.match("[^A-Za-z]+")
+        firstName.match('[^A-Za-z]+')
     ) {
-        throw "First name can only contain letters.";
+        throw 'First name can only contain letters.';
     }
     if (
-        typeof lastName !== "string" ||
+        typeof lastName !== 'string' ||
         lastName.trim().length === 0 ||
-        lastName.match("[^A-Za-z]+")
+        lastName.match('[^A-Za-z]+')
     ) {
-        throw "Last name can only contain letters.";
+        throw 'Last name can only contain letters.';
     }
-    if (typeof age !== "number" || age < 18) {
-        throw "User must be at least 18 years old.";
+    if (typeof age !== 'number' || age < 18) {
+        throw 'User must be at least 18 years old.';
     }
     if (!validEmail(email)) {
-        throw "Email is not valid.";
+        throw 'Email is not valid.';
     }
     if (
-        typeof username !== "string" ||
+        typeof username !== 'string' ||
         username.trim().length < 4 ||
-        username.match("[^A-Za-z0-9]+")
+        username.match('[^A-Za-z0-9]+')
     ) {
-        throw "Username must be at least 4 characters long and can only contain letters and numbers.";
+        throw 'Username must be at least 4 characters long and can only contain letters and numbers.';
     }
     let user = await getByUsername(username);
     if (user) {
-        throw "Provided username is unavailable.";
+        throw 'Provided username is unavailable.';
     }
     if (
-        typeof password !== "string" ||
+        typeof password !== 'string' ||
         password.trim().length < 8 ||
-        password.match("[ ]+")
+        password.match('[ ]+')
     ) {
-        throw "Password must be at least 8 characters long and cannot contain spaces.";
+        throw 'Password must be at least 8 characters long and cannot contain spaces.';
     }
     const hash = await bcrypt.hash(password, saltRounds);
     const collection = await users();
     user = await getByEmail(email);
     if (user) {
-        throw "Email is already taken.";
+        throw 'Email is already taken.';
     }
 
     const date = new Date();
@@ -234,19 +234,19 @@ const create = async (firstName, lastName, email, age, username, password) => {
 const addBalance = async (id, amt) => {
     // add to the balance of a user.
     const _id = getObjectId(id);
-    if (typeof amt !== "number" || amt <= 0) {
-        throw "Added amount must be a number greater than 0.";
+    if (typeof amt !== 'number' || amt <= 0) {
+        throw 'Added amount must be a number greater than 0.';
     }
     const collection = await users();
     const updateInfo = await collection.updateOne(
         {_id},
-        {$inc: {"wallet.balance": amt}}
+        {$inc: {'wallet.balance': amt}}
     );
     if (updateInfo.matchedCount === 0) {
-        throw "User not found with the provided id.";
+        throw 'User not found with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update balance for user.";
+        throw 'Failed to update balance for user.';
     }
     const user = await getById(id);
     return user;
@@ -263,7 +263,7 @@ const getNumberOfShares = async (userId, stockId) => {
         .filter((transaction) => transaction._itemId === stockId)
         .map(
             (transaction) =>
-                transaction.shares * (transaction.pos === "buy" ? 1 : -1)
+                transaction.shares * (transaction.pos === 'buy' ? 1 : -1)
         )
         .reduce((a, b) => a + b, 0);
 };
@@ -278,7 +278,7 @@ const getAveragePrice = async (userId, stockId) => {
         (transaction) => transaction._itemId === stockId
     );
     if (totalShares === 0) {
-        throw "User does not own any of this stock.";
+        throw 'User does not own any of this stock.';
     }
     let count = totalShares; // decrement as
     let averagePrice = 0.0;
@@ -309,7 +309,7 @@ const calculatePortfolioValue = async (userId) => {
         {_id: _userId},
         {
             $push: {
-                "wallet.portfolioValues": {
+                'wallet.portfolioValues': {
                     date: date.toDateString(),
                     value,
                 },
@@ -335,25 +335,25 @@ const addStockTransaction = async (
     const _userId = getObjectId(userId);
     const _stockId = getObjectId(stockId);
     if (!(datetime instanceof Date)) {
-        throw "Must provide a valid Date object.";
+        throw 'Must provide a valid Date object.';
     }
-    if (typeof pos !== "string" || (pos !== "buy" && pos !== "sell")) {
+    if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
         throw 'Pos must either be "buy" or "sell".';
     }
-    if (typeof price !== "number" || price <= 0) {
-        throw "Price must be a number greater than 0.";
+    if (typeof price !== 'number' || price <= 0) {
+        throw 'Price must be a number greater than 0.';
     }
-    if (typeof shares !== "number" || shares <= 0) {
-        throw "Shares must be a number greater than 0.";
+    if (typeof shares !== 'number' || shares <= 0) {
+        throw 'Shares must be a number greater than 0.';
     }
     const user = await getById(userId);
     if (price * shares > user.wallet.balance) {
-        throw "User does not have enough money to make this transaction.";
+        throw 'User does not have enough money to make this transaction.';
     }
     const oldShareAmount = await getNumberOfShares(userId, stockId);
     const newShareAmount = oldShareAmount + shares;
     if (newShareAmount < 0) {
-        throw "User cannot sell more shares than they own.";
+        throw 'User cannot sell more shares than they own.';
     }
     const transaction = {
         _id: new ObjectId(),
@@ -368,32 +368,32 @@ const addStockTransaction = async (
     let updateInfo = await collection.updateOne(
         {_id: _userId},
         {
-            $push: {"wallet.transactions": transaction},
-            $inc: {"wallet.balance": price * shares * (pos === "buy" ? -1 : 1)},
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
         }
     );
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user transactions history and balance after transaction.";
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
     if (oldShareAmount === 0) {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {"wallet.holdings.stocks": _stockId}}
+            {$push: {'wallet.holdings.stocks': _stockId}}
         );
     } else if (newShareAmount === 0) {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {"wallet.holdings.stocks": _stockId}}
+            {$pull: {'wallet.holdings.stocks': _stockId}}
         );
     }
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user holdings after transaction.";
+        throw 'Failed to update user holdings after transaction.';
     }
     const result = await getById(userId);
     return result;
@@ -410,20 +410,20 @@ const sellStockTransaction = async (
     const _userId = getObjectId(userId);
     const _stockId = getObjectId(stockId);
     if (!(datetime instanceof Date)) {
-        throw "Must provide a valid Date object.";
+        throw 'Must provide a valid Date object.';
     }
-    if (typeof pos !== "string" || pos !== "sell") {
+    if (typeof pos !== 'string' || pos !== 'sell') {
         throw 'Pos must be "sell".';
     }
-    if (typeof price !== "number" || price <= 0) {
-        throw "Price must be a number greater than 0.";
+    if (typeof price !== 'number' || price <= 0) {
+        throw 'Price must be a number greater than 0.';
     }
-    if (typeof sharesToSell !== "number" || sharesToSell <= 0) {
-        throw "Shares must be a number greater than 0.";
+    if (typeof sharesToSell !== 'number' || sharesToSell <= 0) {
+        throw 'Shares must be a number greater than 0.';
     }
     const numShares = await getNumberOfShares(userId, stockId);
     if (numShares < sharesToSell) {
-        throw "Error: Cannot sell more shares than owned";
+        throw 'Error: Cannot sell more shares than owned';
     }
     const transaction = {
         _id: new ObjectId(),
@@ -438,25 +438,25 @@ const sellStockTransaction = async (
     let updateInfo = await collection.updateOne(
         {_id: _userId},
         {
-            $push: {"wallet.transactions": transaction},
-            $inc: {"wallet.balance": price * shares * (pos === "buy" ? -1 : 1)},
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * shares * (pos === 'buy' ? -1 : 1)},
         }
     );
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user transactions history and balance after transaction.";
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
     updateInfo = await collection.updateOne(
         {_id: _userId},
-        {$pull: {"wallet.holdings.stocks": _stockId}}
+        {$pull: {'wallet.holdings.stocks': _stockId}}
     );
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user transactions history and balance after transaction.";
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
     const result = await getById(userId);
     return result;
@@ -470,21 +470,21 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     const _userId = getObjectId(userId);
     const _songId = getObjectId(songId);
     if (!(datetime instanceof Date)) {
-        throw "Must provide a valid Date object.";
+        throw 'Must provide a valid Date object.';
     }
-    if (typeof pos !== "string" || (pos !== "buy" && pos !== "sell")) {
+    if (typeof pos !== 'string' || (pos !== 'buy' && pos !== 'sell')) {
         throw 'Position must either be "buy" or "sell".';
     }
-    if (typeof price !== "number" || price <= 0) {
-        throw "Price must be a number greater than 0.";
+    if (typeof price !== 'number' || price <= 0) {
+        throw 'Price must be a number greater than 0.';
     }
     const songDetails = await songsData.get(songId);
-    if (pos === "buy" && songDetails.currentlyAvailable === false) {
-        throw "Sorry song cannot be bought.It is already sold out";
+    if (pos === 'buy' && songDetails.currentlyAvailable === false) {
+        throw 'Sorry song cannot be bought.It is already sold out';
     }
 
-    if (pos === "sell" && songDetails.currentlyAvailable === true) {
-        throw "Sorry song cannot be sold.It has already been sold";
+    if (pos === 'sell' && songDetails.currentlyAvailable === true) {
+        throw 'Sorry song cannot be sold.It has already been sold';
     }
 
     const transaction = {
@@ -496,41 +496,41 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
         pos,
     };
     const user = await getById(userId);
-    if (pos === "buy" && user.wallet.balance < price) {
-        throw "User cannot afford to buy the rights to this music.";
+    if (pos === 'buy' && user.wallet.balance < price) {
+        throw 'User cannot afford to buy the rights to this music.';
     }
-    if (pos === "sell" && !(songId in user.wallet.holdings.songs)) {
-        throw "User does not own the rights to the music that they are trying to sell.";
+    if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
+        throw 'User does not own the rights to the music that they are trying to sell.';
     }
 
     const collection = await users();
     let updateInfo = await collection.updateOne(
         {_id: _userId},
         {
-            $push: {"wallet.transactions": transaction},
-            $inc: {"wallet.balance": price * (pos === "buy" ? -1 : 1)},
+            $push: {'wallet.transactions': transaction},
+            $inc: {'wallet.balance': price * (pos === 'buy' ? -1 : 1)},
         }
     );
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user transactions history and balance after transaction.";
+        throw 'Failed to update user transactions history and balance after transaction.';
     }
     const songsCollection = await songs();
 
     let currAvailabilityFlag = false;
-    if (pos === "sell") {
+    if (pos === 'sell') {
         currAvailabilityFlag = true;
     }
     const updateSongInfo = {
         currentlyAvailable: currAvailabilityFlag,
     };
-    let updatedSongInfo = "";
-    if (pos === "buy") {
+    let updatedSongInfo = '';
+    if (pos === 'buy') {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {"wallet.holdings.songs": _songId}}
+            {$push: {'wallet.holdings.songs': _songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},
@@ -539,7 +539,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     } else {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {"wallet.holdings.songs": _songId}}
+            {$pull: {'wallet.holdings.songs': _songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},
@@ -547,14 +547,14 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
         );
     }
     if (updateInfo.matchedCount === 0) {
-        throw "Could not find user with the provided id.";
+        throw 'Could not find user with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
-        throw "Failed to update user holdings after transaction.";
+        throw 'Failed to update user holdings after transaction.';
     }
 
     if (updatedSongInfo.modifiedCount === 0) {
-        throw "Failed to update song availability after transaction.";
+        throw 'Failed to update song availability after transaction.';
     }
     const result = await getById(userId);
     return result;
