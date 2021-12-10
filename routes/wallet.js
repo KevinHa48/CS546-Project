@@ -44,44 +44,30 @@ router.get('/', async (req, res) => {
         );
 
         let stockIds = userData.wallet.holdings.stocks;
-        if (stockIds.length === 0) {
-            stocks = [];
-        } else {
-            let stocks = [];
-            for (const stockId of stockIds) {
-                const {name, symbol, lastPrice} = await industries.getIndustry(
-                    stockId
-                );
-                console.log(lastPrice);
-                const shares = await users.getNumberOfShares(
-                    userData._id,
-                    stockId
-                );
-                if (shares === 0) continue;
-                const price = await users.getAveragePrice(
-                    userData._id,
-                    stockId
-                );
-                let ret = (lastPrice - price) / price;
-                ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
-                stocks.push({
-                    name,
-                    symbol,
-                    shares,
-                    price,
-                    return: ret,
-                });
-            }
+        let stocks = [];
+        for (const stockId of stockIds) {
+            const {name, symbol, lastPrice} = await industries.getIndustry(
+                stockId
+            );
+            console.log(lastPrice);
+            const shares = await users.getNumberOfShares(userData._id, stockId);
+            if (shares === 0) continue;
+            const price = await users.getAveragePrice(userData._id, stockId);
+            let ret = (lastPrice - price) / price;
+            ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
+            stocks.push({
+                name,
+                symbol,
+                shares,
+                price,
+                return: ret,
+            });
         }
-        const portfolioValues = userData.wallet.portfolioValues;
 
-        let assetVal = 0;
-        if (portfolioValues.length > 0) {
-            assetVal = portfolioValues[portfolioValues.length - 1].value;
-        }
+        const portfolioValues = userData.wallet.portfolioValues;
         res.render('extras/wallet', {
             username: userData.firstName,
-            assets: assetVal,
+            assets: portfolioValues[portfolioValues.length - 1].value,
             time: greeting,
             stocks,
             songs: songArr,
