@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const stocksData = require("../data/industries");
+const {users, songs, industries} = require('../data');
 
 router.get('/:id', async (req, res) => {
-    let industry = await stocksData.getIndustry(req.params.id)
-    let call1 = await stocksData.financeAPI(industry.symbol)
+    const stockId = await users.getObjectId(req.params.id).toString();
+    let ind = await industries.getIndustry(stockId);
     res.render('extras/stock', {
-        name: industry.name,
-        symbol: industry.symbol,
-        fiftyDayAverage: call1.quoteResponse.result[0].fiftyDayAverage,
-        regularMarketPrice: call1.quoteResponse.result[0].regularMarketPrice,
-        regularMarketDayHigh: call1.quoteResponse.result[0].regularMarketDayHigh,
-        regularMarketDayLow: call1.quoteResponse.result[0].regularMarketDayLow
+        name: ind.name,
+        id: req.params.id,
+        symbol: ind.symbol,
+        fiftyDayAverage: ind.fiftyDayAverage,
+        regularMarketPrice: ind.lastPrice,
+        regularMarketDayHigh: ind.regularMarketDayHigh,
+        regularMarketDayLow: ind.regularMarketDayLow,
     })
 })
 

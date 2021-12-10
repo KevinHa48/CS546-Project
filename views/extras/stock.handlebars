@@ -45,17 +45,22 @@
     </div>
 </div>
 <div id="stock-form">
-    <form id="buy-stock" action="/wallet" method="POST">
+    <form id="buy-stock" action="/wallet/stocks/{{id}}" method="POST">
         <div id="stock-form-contents">
             <div id="stock-form-first">
                 <label for="shares">How many shares would you like to purchase?</label>
             </div>
             <div id="stock-form-second">
-                <input type="text" id="shares" placeholder="Number of Shares">
+                <input type="text" name="shares" id="shares" placeholder="Number of Shares">
             </div>
             <div id="stock-form-second">
                 <button type="submit">Buy Now</button>
             </div>
         </div>
     </form>
+</div>
+<div id="stock-errors">
+    {{#if errors}}
+        <p>{{errors}}</p>
+    {{/if}}
 </div>
