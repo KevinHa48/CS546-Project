@@ -44,31 +44,44 @@ router.get("/", async (req, res) => {
         );
 
         let stockIds = userData.wallet.holdings.stocks;
-        let stocks = [];
-        for (const stockId of stockIds) {
-            const {name, symbol, lastPrice} = await industries.getIndustry(
-                stockId
-            );
-            console.log(lastPrice);
-            const shares = await users.getNumberOfShares(userData._id, stockId);
-            if (shares === 0) continue;
-            const price = await users.getAveragePrice(userData._id, stockId);
-            let ret = (lastPrice - price) / price;
-            ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
-            stocks.push({
-                name,
-                symbol,
-                shares,
-                price,
-                return: ret,
-            });
+        if (stockIds.length === 0) {
+            stocks = [];
+        } else {
+            let stocks = [];
+            for (const stockId of stockIds) {
+                const {name, symbol, lastPrice} = await industries.getIndustry(
+                    stockId
+                );
+                console.log(lastPrice);
+                const shares = await users.getNumberOfShares(
+                    userData._id,
+                    stockId
+                );
+                if (shares === 0) continue;
+                const price = await users.getAveragePrice(
+                    userData._id,
+                    stockId
+                );
+                let ret = (lastPrice - price) / price;
+                ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
+                stocks.push({
+                    name,
+                    symbol,
+                    shares,
+                    price,
+                    return: ret,
+                });
+            }
         }
-
         const portfolioValues = userData.wallet.portfolioValues;
 
+        let assetVal = 0;
+        if (portfolioValues.length > 0) {
+            assetVal = portfolioValues[portfolioValues.length - 1].value;
+        }
         res.render("extras/wallet", {
             username: userData.firstName,
-            assets: portfolioValues[portfolioValues.length - 1].value,
+            assets: assetVal,
             time: greeting,
             stocks,
             songs: songArr,
@@ -90,7 +103,6 @@ router.post("/songs/:id", async (req, res) => {
         // Grab the song data, which will be used for the next function.
         const songId = users.getObjectId(req.params.id).toString();
         const songData = await songs.get(songId);
-
         // Grab the user to extract their ID.
         const userInfo = await users.getByUsername(req.session.user);
         const userId = userInfo._id.toString();
@@ -106,10 +118,12 @@ router.post("/songs/:id", async (req, res) => {
         res.redirect("/wallet");
     } catch (e) {
         let songData = await songs.get(req.params.id);
+        const songCover = await getSpotifyData(songData);
         console.log(songData.price);
         res.render("extras/songDetails", {
             title: "Music Details",
             songs: songData,
+            image: songCover.image,
             errors: e,
         });
     }

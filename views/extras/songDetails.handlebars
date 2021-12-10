@@ -10,39 +10,43 @@
     </nav>
 </header>
 <main>
-    <h1>{{songs.name}}</h1>
-    <div class="songs-description">
-        <h2>Artist</h2>
-        <h3>{{songs.artist}}</h3>
+    <div class="songs-desc-left songs-desc-split">
+        <form id="all-songs" action="/songs" method="GET">
+            <button type="submit" class="nav-all-songs">Back to All Songs</button>
+        </form>
+        <div class="centered">
+            <h1 class="songs-description-artist">{{songs.name}} by {{songs.artist}}</h1>
+                <img class = "songs-desc-cover"  src = "{{image}}">
+        </div>
     </div>
-    <div class="songs-description">
-        <h2>Price</h2>
-        <h3>${{songs.price}}</h3>
+
+    <div class="songs-desc-right songs-desc-split">
+        <div class="centered">
+                <h2 class="songs-description-headings">Description</h2>
+                <h3 class="songs-description-values">{{songs.description}}</h3>
+                
+                <h2 class="songs-description-headings">Number of Tracks</h2>
+                <h3 class="songs-description-values">{{songs.numberOfTracks}}</h3>
+    
+                <h2 class="songs-description-headings">Genre</h2>
+                <h3 class="songs-description-values">{{songs.genre}}</h3>
+
+                <h2 class="songs-description-headings">Current Price</h2>
+                <h3 class="songs-description-values">${{songs.price}}</h3>
+
+                <h2 class="songs-description-headings">Last Sold Price</h2>
+                <h3 class="songs-description-values">${{songs.lastSoldPrice}}</h3>
+            
+                <h2 class="songs-description-headings">currently Available</h2>
+                <h3 class="songs-description-values">{{songs.currentlyAvailable}}</h3>
+            </div>
+            <form id="buy-songs" action="/wallet/songs/{{songs._id}}" method="POST">
+                <button type="submit" class="buy-songs">Buy Now</button>
+            </form>
+            {{#if errors}}
+                <p>{{errors}}</p>
+            {{/if}}
+        </div>
     </div>
-    <div class="songs-description">
-        <h2>Genre</h2>
-        <h3>{{songs.genre}}</h3>
-    </div>
-    <div class="songs-description">
-        <h2>Description</h2>
-        <h3>{{songs.description}}</h3>
-    </div>
-    <div class="songs-description">
-        <h2>Last Sold Price</h2>
-        <h3>${{songs.lastSoldPrice}}</h3>
-    </div>
-    <div class="songs-description">
-        <h2>Number of Tracks</h2>
-        <h3>{{songs.numberOfTracks}}</h3>
-    </div>
-    <div class="songs-description">
-        <h2>currently Available</h2>
-        <h3>{{songs.currentlyAvailable}}</h3>
-    </div>
-    <img class = "covers"  src = "{{image}}">
-    <form id="buy-songs" action="/wallet/songs/{{songs._id}}" method="POST" class="buy-songs">
-        <button type="submit">Buy Now</button>
-    {{#if errors}}
-        <p>{{errors}}</p>
-    {{/if}}
+
 </main>

@@ -36,13 +36,13 @@ header {
     width: auto;
 }
 
-#market-industries-img{
+#market-industries-img {
     height: 500px;
-    width: auto
+    width: auto;
 }
-#market-musicRights-img{
+#market-musicRights-img {
     height: 500px;
-    width: auto
+    width: auto;
 }
 
 /* Wallet CSS starts here */
@@ -125,7 +125,7 @@ header {
 
 .action {
     text-transform: uppercase;
-    color:rgb(136, 136, 115)
+    color: rgb(136, 136, 115);
 }
 
 #no-tra {
@@ -197,8 +197,6 @@ header {
     font-size: 18px;
 }
 
-
-
 /* Owned songs CSS Ends */
 
 /* Wallet CSS ends here */
@@ -211,7 +209,7 @@ header {
 }
 
 .login-and-signup > [type="submit"] {
-    background: #6FDD8E;
+    background: #6fdd8e;
     padding: 5px;
 }
 
@@ -358,9 +356,21 @@ figure {
     table-layout: fixed;
     border: 1px solid black;
     border-collapse: collapse;
-    margin-top: 6%;
+    margin-top: 10%;
     border-radius: 4px;
     border-spacing: 0px;
+}
+
+.table-list-row {
+    line-height: 25px;
+}
+
+.table-list-top-header {
+    margin-bottom: 100px;
+}
+
+.table-list-header {
+    line-height: 40px;
 }
 
 /* td,
@@ -371,7 +381,19 @@ th {
     border-left: 1px;
     border-right: 1px;
 } */
+th:hover {
+    cursor: pointer;
+    background: darkolivegreen;
+}
+/* table,
+th,
+td {
+    border: 1px solid black;
+} */
 
+thead.table-list-top-header {
+    background-color: rgb(120, 192, 120);
+}
 .left-column {
     width: 20%;
     align-content: left;
@@ -385,16 +407,76 @@ th {
 }
 
 .clickable-row:nth-child(even) {
-    background-color: #dddddd;
+    background-color: rgb(210, 230, 210);
 }
 
 .clickable-row:hover {
     cursor: pointer;
-    background-color: rgb(136, 136, 115);
+    background-color: lightgrey;
+}
+.nav-all-songs {
+    border: none;
+    color: white;
+    background-color: green;
+    padding: 8px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-top: 3%;
+    margin-left: -400px;
+    margin-bottom: 50px;
+}
+.buy-songs {
+    border: none;
+    color: white;
+    background-color: green;
+    padding: 20px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-top: 3%;
+}
+.songs-description-headings {
+    margin-top: 15px;
 }
 
-.buy-songs {
-    margin-top: 3%;
+.songs-description-values {
+    margin-top: 2px;
+    color: grey;
+}
+
+.songs-description-artist {
+    color: black;
+}
+
+.songs-desc-left {
+    left: 0;
+    background-color: white;
+}
+
+.songs-desc-right {
+    right: 0;
+    background-color: white;
+}
+
+.songs-desc-cover {
+    margin-top: 50px;
+}
+
+.songs-desc-split {
+    height: 80%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 60px;
+    overflow-x: hidden;
+    padding-top: 30px;
 }
 
 .songs-description {
@@ -403,7 +485,6 @@ th {
     margin-top: 3%;
 }
 /* songs css ends here */
-
 
 /* Wallet chart css begins here */
 #chartDiv {
@@ -415,7 +496,7 @@ th {
 
 /* Industry CSS begins here*/
 
-#industry-home{
+#industry-home {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -423,21 +504,33 @@ th {
     padding-top: 20px;
 }
 
-#industry-list ul{
+#industry-list ul {
     list-style: none;
 }
 
-#industry-list ul li{
+#industry-list ul li {
     padding-top: 20px;
     text-decoration: none;
 }
 
-#industry-list ul a:link { text-decoration: none; color: blue}
-#industry-list ul a:visited { text-decoration: none; color: blue}
-#industry-list ul a:hover { text-decoration: none; color: #6fdd8e}
-#industry-list ul a:active { text-decoration: none; color: blue}
+#industry-list ul a:link {
+    text-decoration: none;
+    color: blue;
+}
+#industry-list ul a:visited {
+    text-decoration: none;
+    color: blue;
+}
+#industry-list ul a:hover {
+    text-decoration: none;
+    color: #6fdd8e;
+}
+#industry-list ul a:active {
+    text-decoration: none;
+    color: blue;
+}
 
-#stock-body{
+#stock-body {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -446,25 +539,25 @@ th {
     padding-bottom: 20px;
 }
 
-#stock-info ul{
+#stock-info ul {
     list-style: none;
     padding-left: 5px;
 }
 
-#stock-info ul li{
+#stock-info ul li {
     padding-top: 20px;
 }
 
-.tradingview-widget-stock{
+.tradingview-widget-stock {
     padding-right: 5px;
 }
 
-#stock-form-contents{
+#stock-form-contents {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
-#stock-form-contents *{
+#stock-form-contents * {
     padding-bottom: 5px;
 }
