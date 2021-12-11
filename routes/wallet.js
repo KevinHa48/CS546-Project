@@ -14,8 +14,10 @@ router.get('/', async (req, res) => {
          that into an array to pass to hbs.*/
         const songArr = await Promise.all(
             userData.wallet.holdings.songs.map(async (song) => {
-                let songObj = await songs.get(song.toString());
-                return await getSpotifyData(songObj);
+                let songObj = await songs.get(song);
+                let result = await getSpotifyData(songObj);
+                result._id = song;
+                return result;
             })
         );
         // Get the current time of the day to greet the user.
@@ -49,13 +51,13 @@ router.get('/', async (req, res) => {
             const {name, symbol, lastPrice} = await industries.getIndustry(
                 stockId
             );
-            console.log(lastPrice + "hhh");
             const shares = await users.getNumberOfShares(userData._id, stockId);
             if (shares === 0) continue;
             const price = await users.getAveragePrice(userData._id, stockId);
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
             stocks.push({
+                _id: stockId,
                 name,
                 symbol,
                 shares,
@@ -105,7 +107,6 @@ router.post('/songs/:id', async (req, res) => {
     } catch (e) {
         let songData = await songs.get(req.params.id);
         const songCover = await getSpotifyData(songData);
-        console.log(songData.price);
         res.render('extras/songDetails', {
             title: 'Music Details',
             songs: songData,
@@ -114,6 +115,95 @@ router.post('/songs/:id', async (req, res) => {
         });
     }
 });
+
+// Selling a song
+router.delete('/songs/:id', async (req, res) => {
+    const id = xss(req.params.id)
+    const username = req.session.user
+    let _id
+    try {
+        _id = users.getObjectId(id)
+    } catch {
+        res.status(400).json({error: 'Invalid song id.'})
+        return
+    }
+    let song
+    try {
+        song = await songs.get(id)
+    } catch {
+        res.status(404).json({error: 'Song does not exist.'})
+        return
+    }
+    let user = await users.getByUsername(username)
+    if (!(id in user.wallet.holdings.songs)) {
+        res.status(400).json({error: 'You do not own the rights to this song!'})
+        return
+    }
+    try {
+        user = await users.addSongTransaction(user._id, new Date(), id, 'sell', song.price)
+    } catch {
+        res.status(500).json({error: 'Internal Server Error'})
+        return
+    }
+    res.json({balance: user.wallet.balance})
+})
+
+// Selling shares of stock
+router.delete('/stocks/:id', async (req, res) => {
+    const id = xss(req.params.id)
+    // const username = req.session.user
+    const username = req.body.username
+    const shares = parseInt(xss(req.body.shares))
+    let _id
+    console.log(username)
+    try {
+        _id = users.getObjectId(id)
+    } catch {
+        res.status(400).json({error: 'Invalid stock id.'})
+        return
+    }
+    if (typeof shares !== 'number' || shares <= 0) {
+        res.status(400).json({error: 'Shares must be a number greater than 0.'})
+        return
+    }
+    let industry
+    try {
+        industry = await industries.getIndustry(id)
+    } catch {
+        res.status(404).json({error: 'Stock does not exist.'})
+        return
+    }
+    let user = await users.getByUsername(username)
+    console.log(id)
+    console.log(user.wallet.holdings.stocks)
+    let stockInHoldings = false
+    for (const stockId of user.wallet.holdings.stocks) {
+        if (id === stockId) {
+            stockInHoldings = true
+            break
+        }
+    }
+    if (!stockInHoldings) {
+        res.status(400).json({error: 'You do not own that stock.'})
+        return
+    }
+    const ownedShares = await users.getNumberOfShares(user._id, id)
+    if (shares > ownedShares) {
+        res.status(400).json({error: 'You cannot sell more shares than you own.'})
+        return
+    }
+    try {
+        user = await users.addStockTransaction(user._id, new Date(), id, 'sell', industry.lastPrice, shares)
+    } catch {
+        res.status(500).json({error: 'Internal Server Error'})
+        return
+    }
+    const remainingShares = await users.getNumberOfShares(user._id, id)
+    res.json({
+        balance: user.wallet.balance, // buying power will change.
+        remainingShares // for displaying remaining shares, if any
+    })
+})
 
 // Buying a stock
 router.post('/stocks/:id', async (req, res) => {

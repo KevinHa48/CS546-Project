@@ -374,12 +374,16 @@ const addStockTransaction = async (
     if (oldShareAmount === 0) {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {'wallet.holdings.stocks': _stockId}}
+            {$push: {'wallet.holdings.stocks': stockId}}
         );
+        if (updateInfo.modifiedCount === 0) {
+            throw 'Failed to add stock to holdings array.'
+        }
     } else if (newShareAmount === 0) {
+        console.log('sold out')
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {'wallet.holdings.stocks': _stockId}}
+            {$pull: {'wallet.holdings.stocks': stockId}}
         );
     }
     if (updateInfo.matchedCount === 0) {
@@ -523,7 +527,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (pos === 'buy') {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {'wallet.holdings.songs': _songId}}
+            {$push: {'wallet.holdings.songs': songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},
@@ -532,7 +536,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     } else {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {'wallet.holdings.songs': _songId}}
+            {$pull: {'wallet.holdings.songs': songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},

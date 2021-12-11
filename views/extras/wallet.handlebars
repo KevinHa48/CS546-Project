@@ -27,6 +27,7 @@
                                 <th>Songs Owned </th>
                                 <th>Date Purchased</th>
                                 <th>Current Value</th>
+                                <th></th> {{!-- column for sell buttons --}}
                             </tr>
                         </thead>
                         {{#if songs}}
@@ -35,13 +36,17 @@
                                 <td class = "song-cell">
                                     <img
                                     class = "covers" 
-                                    src = "{{image}}">
+                                    src = "{{image}}"
+                                    alt = "Cover of {{name}} by {{artist}}">
                                     <p class = "song-name">{{name}}</p>
                                     <p class = "artist">{{artist}}</p>
                                     
                                 </td>
                                 <td>February 1, 2021</td>
                                 <td>${{price}}</td>
+                                <td>
+                                    <button songId="{{_id}}" class="sell-song-button">Sell</button>
+                                </td>
                             </tr>
                             {{/each}}
                         {{else}}
@@ -91,6 +96,9 @@
                             <td>
                                 <p>Shares:{{shares}}</p>
                                 <p class = "change">{{return}}%</p>
+                            </td>
+                            <td>
+                                <button stockid="{{id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
                     {{/each}}
