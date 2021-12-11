@@ -50,7 +50,9 @@ async function get(searchId) {
 
 async function getAll() {
     const songsCollection = await songs();
-    const songsList = await songsCollection.find({}).toArray();
+    const songsList = await songsCollection
+        .find({currentlyAvailable: {$eq: true}})
+        .toArray();
     if (songsList.length === 0) {
         return [];
     }
