@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 const express = require('express');
 const {getSpotifyData} = require('../utils/spotifyAPI');
 const xss = require('xss');
 const {users, songs, industries} = require('../data');
 const {getAveragePrice} = require('../data/users');
+=======
+const express = require("express");
+const { getSpotifyData } = require('../utils/spotifyAPI');
+const xss = require("xss")
+const { users, songs, industries } = require("../data");
+const { getAveragePrice, addBalance } = require("../data/users");
+>>>>>>> Added form so that user can add buying power to their wallet on the
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -63,9 +71,14 @@ router.get('/', async (req, res) => {
                 return: ret,
             });
         }
+<<<<<<< HEAD
 
         const portfolioValues = userData.wallet.portfolioValues;
         res.render('extras/wallet', {
+=======
+        // songArr to songs?
+        res.render("extras/wallet", {
+>>>>>>> Added form so that user can add buying power to their wallet on the
             username: userData.firstName,
             assets: portfolioValues[portfolioValues.length - 1].value,
             time: greeting,
@@ -185,12 +198,40 @@ router.post('/stocks/:id', async (req, res) => {
 router.get('/portfolio_value', async (req, res) => {
     const username = xss(req.session.user);
     try {
+<<<<<<< HEAD
         const user = await users.getByUsername(username);
         //console.log(user);
         res.json(user.wallet.portfolioValues);
+=======
+        const user = await users.getByUsername(username)
+        res.json(user.wallet.portfolioValues)
+>>>>>>> Added form so that user can add buying power to their wallet on the
     } catch {
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
+
+router.post('/add_balance', async (req, res) => {
+    const username = xss(req.session.user)
+    const amt = parseInt(xss(req.body.amt))
+    if (typeof amt !== 'number' || amt <= 0) {
+        res.status(400).json({error: 'Amount must be a number greater than 0.'})
+        return
+    }
+    const user = await users.getByUsername(username)
+    const newBalance = user.wallet.balance + amt
+    if (newBalance > 1e6) {
+        res.status(400).json({error: "You can only add up to $1,000,000 in buying power."})
+        return
+    }
+    try {
+        await users.addBalance(user._id, amt) 
+    } catch (e) {
+        console.log(e)
+        res.status(500).json({error: e})
+        return
+    }
+    res.json({balance: newBalance})
+})
 
 module.exports = router;

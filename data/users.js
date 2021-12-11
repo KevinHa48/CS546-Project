@@ -304,6 +304,7 @@ const addBalance = async (id, amt) => {
     // add to the balance of a user.
     const _id = getObjectId(id);
     if (typeof amt !== 'number' || amt <= 0) {
+<<<<<<< HEAD
         throw 'Added amount must be a number greater than 0.';
     }
 <<<<<<< HEAD
@@ -314,10 +315,14 @@ const addBalance = async (id, amt) => {
     );
 =======
     const user = getById(id)
+=======
+        throw 'Added amount must be a number greater than 0.'
+    }
+    let user = await getById(id)
+>>>>>>> Added form so that user can add buying power to their wallet on the
     if (!user) {
         throw 'User not founded with the provided id.'
     }
-    amt = parseFloat(amt * 100) / 100
     if (user.wallet.balance + amt > 1e6) {
         throw 'You cannot add more to your balance when it is past $1,000,000.'
     }
@@ -331,6 +336,7 @@ const addBalance = async (id, amt) => {
         throw 'Failed to update balance for user.';
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     const user = await getById(id);
     return user;
 };
@@ -341,6 +347,9 @@ const addBalance = async (id, amt) => {
         console.log(e)
     }
     const user = await getById(id)
+=======
+    user = await getById(id)
+>>>>>>> Added form so that user can add buying power to their wallet on the
     return user
 }
 >>>>>>> Fixed an issue where login and signup was not working.
