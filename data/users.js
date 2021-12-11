@@ -119,25 +119,6 @@ const getById = async (id) => {
 }
 
 const getAll = async () => {
-    const collection = await users()
-    let result = await collection.find().toArray()
-    result = result.map(user => {
-        user._id = user._id.toString()
-        for (holdingType of Object.keys(user.wallet.holdings)) {
-            user.wallet.holdings[holdingType] = user.wallet.holdings[holdingType].map(holding => holding.toString())
-        }
-        user.wallet.transactions = user.wallet.transactions.map(transaction => {
-            return {
-                ...transaction,
-                _id: transaction._id.toString(),
-                _itemId: transaction._itemId.toString()
-            }
-        })
-    })
-    return user
-}
-
-const getAll = async () => {
     const collection = await users();
     let result = await collection.find().toArray();
     result = result.map((user) => {
@@ -243,19 +224,10 @@ const addBalance = async (id, amt) => {
     if (typeof amt !== 'number' || amt <= 0) {
         throw 'Added amount must be a number greater than 0.';
     }
-    const user = getById(id)
+    let user = getById(id)
     if (!user) {
         throw 'User not founded with the provided id.'
     }
-    amt = parseFloat(amt * 100) / 100
-    if (user.wallet.balance + amt > 1e6) {
-        throw 'You cannot add more to your balance when it is past $1,000,000.'
-    }
-    const user = getById(id)
-    if (!user) {
-        throw 'User not founded with the provided id.'
-    }
-    amt = parseFloat(amt * 100) / 100
     if (user.wallet.balance + amt > 1e6) {
         throw 'You cannot add more to your balance when it is past $1,000,000.'
     }
@@ -267,7 +239,7 @@ const addBalance = async (id, amt) => {
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update balance for user.';
     }
-    const user = await getById(id);
+    user = await getById(id);
     return user;
 };
 

@@ -1,16 +1,8 @@
-<<<<<<< HEAD
-const express = require('express');
-const {getSpotifyData} = require('../utils/spotifyAPI');
-const xss = require('xss');
-const {users, songs, industries} = require('../data');
-const {getAveragePrice} = require('../data/users');
-=======
 const express = require("express");
 const { getSpotifyData } = require('../utils/spotifyAPI');
 const xss = require("xss")
 const { users, songs, industries } = require("../data");
 const { getAveragePrice, addBalance } = require("../data/users");
->>>>>>> Added form so that user can add buying power to their wallet on the
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -71,14 +63,8 @@ router.get('/', async (req, res) => {
                 return: ret,
             });
         }
-<<<<<<< HEAD
-
-        const portfolioValues = userData.wallet.portfolioValues;
-        res.render('extras/wallet', {
-=======
         // songArr to songs?
         res.render("extras/wallet", {
->>>>>>> Added form so that user can add buying power to their wallet on the
             username: userData.firstName,
             assets: portfolioValues[portfolioValues.length - 1].value,
             time: greeting,
@@ -198,14 +184,8 @@ router.post('/stocks/:id', async (req, res) => {
 router.get('/portfolio_value', async (req, res) => {
     const username = xss(req.session.user);
     try {
-<<<<<<< HEAD
-        const user = await users.getByUsername(username);
-        //console.log(user);
-        res.json(user.wallet.portfolioValues);
-=======
         const user = await users.getByUsername(username)
         res.json(user.wallet.portfolioValues)
->>>>>>> Added form so that user can add buying power to their wallet on the
     } catch {
         res.status(500).json({error: 'Internal Server Error'});
     }
