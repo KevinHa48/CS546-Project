@@ -385,11 +385,6 @@ th {
     cursor: pointer;
     background: darkolivegreen;
 }
-/* table,
-th,
-td {
-    border: 1px solid black;
-} */
 
 thead.table-list-top-header {
     background-color: rgb(120, 192, 120);
