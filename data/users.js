@@ -49,37 +49,6 @@ const getByUsername = async (username) => {
     /* checking that a user with the provided username does not already exist
        before creating document. Password is optional argument to verify that
        user has that password. It should be hashed when passed in. */
-<<<<<<< HEAD
-    if (
-        typeof username !== 'string' ||
-        username.trim().length < 4 ||
-        username.match('[^A-Za-z0-9]+')
-    ) {
-        throw 'Username must be at least 4 characters long and can only contain letters and numbers.';
-    }
-    username = username.toLowerCase();
-    const collection = await users();
-    const user = await collection.findOne({username});
-    if (!user) {
-        throw 'No user was found with the provided username.';
-    }
-    // displaying all the ObjectIds as strings.
-    user._id = user._id.toString();
-    for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[
-            holdingType
-        ].map((holding) => holding.toString());
-    }
-    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
-        return {
-            ...transaction,
-            _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString(),
-        };
-    });
-    return user;
-};
-=======
     if (typeof username !== 'string' || username.trim().length < 4 || username.match('[^A-Za-z0-9]+')) {
         throw 'Username must be at least 4 characters long and can only contain letters and numbers.'
     }
@@ -102,36 +71,11 @@ const getByUsername = async (username) => {
     }
     return user
 }
->>>>>>> Fixed an issue where login and signup was not working.
 
 const getByEmail = async (email) => {
     if (!validEmail(email)) {
         throw 'Provided email is invalid.';
     }
-<<<<<<< HEAD
-    email = email.toLowerCase();
-    const collection = await users();
-    const user = collection.findOne({email});
-    if (!user) {
-        throw 'No user was found with the provided email.';
-    }
-    // displaying all the ObjectIds as strings.
-    user._id = user._id.toString();
-    for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[
-            holdingType
-        ].map((holding) => holding.toString());
-    }
-    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
-        return {
-            ...transaction,
-            _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString(),
-        };
-    });
-    return user;
-};
-=======
     email = email.toLowerCase()
     const collection = await users()
     const user = await collection.findOne({email})
@@ -151,34 +95,9 @@ const getByEmail = async (email) => {
     }
     return user
 }
->>>>>>> Fixed an issue where login and signup was not working.
 
 const getById = async (id) => {
     // return document of user with provided id.
-<<<<<<< HEAD
-    const _id = getObjectId(id);
-    const collection = await users();
-    let user = await collection.findOne({_id});
-    if (!user) {
-        throw 'No user was found with the provided id.';
-    }
-    // displaying all the ObjectIds as strings.
-    user._id = user._id.toString();
-    for (holdingType of Object.keys(user.wallet.holdings)) {
-        user.wallet.holdings[holdingType] = user.wallet.holdings[
-            holdingType
-        ].map((holding) => holding.toString());
-    }
-    user.wallet.transactions = user.wallet.transactions.map((transaction) => {
-        return {
-            ...transaction,
-            _id: transaction._id.toString(),
-            _itemId: transaction._itemId.toString(),
-        };
-    });
-    return user;
-};
-=======
     const _id = getObjectId(id)
     const collection = await users()
     let user = await collection.findOne({_id})
@@ -198,7 +117,6 @@ const getById = async (id) => {
     }
     return user
 }
->>>>>>> Fixed an issue where login and signup was not working.
 
 const getAll = async () => {
     const collection = await users();
@@ -304,55 +222,27 @@ const addBalance = async (id, amt) => {
     // add to the balance of a user.
     const _id = getObjectId(id);
     if (typeof amt !== 'number' || amt <= 0) {
-<<<<<<< HEAD
         throw 'Added amount must be a number greater than 0.';
     }
-<<<<<<< HEAD
-    const collection = await users();
-    const updateInfo = await collection.updateOne(
-        {_id},
-        {$inc: {'wallet.balance': amt}}
-    );
-=======
     const user = getById(id)
-=======
-        throw 'Added amount must be a number greater than 0.'
-    }
-    let user = await getById(id)
->>>>>>> Added form so that user can add buying power to their wallet on the
     if (!user) {
         throw 'User not founded with the provided id.'
     }
+    amt = parseFloat(amt * 100) / 100
     if (user.wallet.balance + amt > 1e6) {
         throw 'You cannot add more to your balance when it is past $1,000,000.'
     }
     const collection = await users()
     const updateInfo = await collection.updateOne({_id}, {$inc: {'wallet.balance': amt}})
->>>>>>> Fixed an issue where login and signup was not working.
     if (updateInfo.matchedCount === 0) {
         throw 'User not found with the provided id.';
     }
     if (updateInfo.modifiedCount === 0) {
         throw 'Failed to update balance for user.';
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
     const user = await getById(id);
     return user;
 };
-=======
-    try {
-        await calculatePortfolioValue(id)
-    } catch (e) {
-        console.log(e)
-    }
-    const user = await getById(id)
-=======
-    user = await getById(id)
->>>>>>> Added form so that user can add buying power to their wallet on the
-    return user
-}
->>>>>>> Fixed an issue where login and signup was not working.
 
 const getNumberOfShares = async (userId, stockId) => {
     // calculates the total number of shares a user has of a particular stock.
@@ -403,22 +293,6 @@ const calculatePortfolioValue = async (userId) => {
     }
     value += user.wallet.balance
     // Force to two decimal places, and do not round.
-<<<<<<< HEAD
-    value = Math.trunc(value * 100) / 100 + user.balance;
-
-    const date = new Date();
-    const collection = await users();
-
-    const updateInfo = await collection.updateOne(
-        {_id: _userId},
-        {
-            $push: {
-                'wallet.portfolioValues': {
-                    date: date.toDateString(),
-                    value,
-                },
-            },
-=======
     value = Math.trunc(value*100)/100;
     
     const date = new Date()
@@ -434,9 +308,8 @@ const calculatePortfolioValue = async (userId) => {
                 date: date.toDateString(), 
                 value
             }
->>>>>>> Fixed an issue where login and signup was not working.
         }
-    );
+    });
     user = await getById(userId);
     return user.wallet.portfolioValues;
 };
