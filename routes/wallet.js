@@ -9,6 +9,8 @@ router.get('/', async (req, res) => {
     try {
         const username = xss(req.session.user);
         const userData = await users.getByUsername(username);
+        let assets = userData.wallet.balance
+        let portfolioValue = userData.wallet.balance
 
         /* For each song call get and query for it's object representation, then put
          that into an array to pass to hbs.*/
@@ -17,6 +19,13 @@ router.get('/', async (req, res) => {
                 let songObj = await songs.get(song);
                 let result = await getSpotifyData(songObj);
                 result._id = song;
+                for (const transaction of userData.wallet.transactions.reverse()) {
+                    if (transaction._itemId === song) {
+                        result.date = transaction.datetime.toDateString()
+                        assets += result.price
+                        break 
+                    }
+                }
                 return result;
             })
         );
@@ -45,6 +54,7 @@ router.get('/', async (req, res) => {
             })
         );
 
+        let pnl = 0.0 //profit and loss. this is the value that is shown at the top: You have made ${pnl} Today!
         let stockIds = userData.wallet.holdings.stocks;
         let stocks = [];
         for (const stockId of stockIds) {
@@ -53,7 +63,10 @@ router.get('/', async (req, res) => {
             );
             const shares = await users.getNumberOfShares(userData._id, stockId);
             if (shares === 0) continue;
+            assets += lastPrice * shares
+            portfolioValue += lastPrice * shares
             const price = await users.getAveragePrice(userData._id, stockId);
+            pnl += (lastPrice - price)
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
             stocks.push({
@@ -66,16 +79,17 @@ router.get('/', async (req, res) => {
             });
         }
 
-        const portfolioValues = userData.wallet.portfolioValues;
         res.render('extras/wallet', {
             username: userData.firstName,
-            assets: portfolioValues[portfolioValues.length - 1].value,
+            assets: assets.toFixed(2),
             time: greeting,
             stocks,
             songs: songArr,
-            balance: userData.wallet.balance,
-            portfolioValues: portfolioValues,
+            balance: userData.wallet.balance.toFixed(2),
             transactions: transactions,
+            pnl: Math.abs(pnl).toFixed(2),
+            profit: pnl >= 0,
+            total_ret: (pnl / portfolioValue * 100).toFixed(2),
         });
     } catch (e) {
         // Error here.
