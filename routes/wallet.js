@@ -49,7 +49,6 @@ router.get('/', async (req, res) => {
             const {name, symbol, lastPrice} = await industries.getIndustry(
                 stockId
             );
-            console.log(lastPrice + "hhh");
             const shares = await users.getNumberOfShares(userData._id, stockId);
             if (shares === 0) continue;
             const price = await users.getAveragePrice(userData._id, stockId);
