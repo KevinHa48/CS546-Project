@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
             const {name, symbol, lastPrice} = await industries.getIndustry(
                 stockId
             );
-            console.log(lastPrice);
+            console.log(lastPrice + "hhh");
             const shares = await users.getNumberOfShares(userData._id, stockId);
             if (shares === 0) continue;
             const price = await users.getAveragePrice(userData._id, stockId);
@@ -161,8 +161,9 @@ router.post('/stocks/:id', async (req, res) => {
                 regularMarketPrice: ind.lastPrice,
                 regularMarketDayHigh: ind.regularMarketDayHigh,
                 regularMarketDayLow: ind.regularMarketDayLow,
-                errors: errors
+                errors: e
             })
+            return
         }
         res.redirect('/wallet');
         return
@@ -177,6 +178,7 @@ router.post('/stocks/:id', async (req, res) => {
             regularMarketDayLow: ind.regularMarketDayLow,
             errors: errors
         })
+        return
     }
 });
 
