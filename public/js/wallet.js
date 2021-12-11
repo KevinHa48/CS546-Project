@@ -31,8 +31,8 @@
                 amt: add_balance_amt_val
             },
             success: res => {
-                buying_power.text('$' + `${res.balance}`)
-                total_assets.text('$' + `${total_assets_val + add_balance_amt_val}`)
+                buying_power.text('$' + `${res.balance.toFixed(2)}`)
+                total_assets.text('$' + `${(total_assets_val + add_balance_amt_val).toFixed(2)}`)
                 add_balance_alert.text('$' + `${add_balance_amt_val}.00 added to your buying power!`)
                 add_balance_alert.show()
                 add_balance_amt.val(0)

@@ -286,9 +286,17 @@ const calculatePortfolioValue = async (userId) => {
     let user = await getById(userId);
     const industries = await getAllIndustries();
     let value = 0.0;
+    let rets = [];
+    let amts = [];
     for (const industry of industries) {
         const shares = await getNumberOfShares(userId, industry._id);
+        if (shares === 0) {
+            continue
+        }
+        const averagePrice = await getAveragePrice(userId, industry._id)
         value += shares * industry.lastPrice;
+        rets.push((industry.lastPrice - averagePrice) / averagePrice)
+        amts.push(shares * industry.lastPrice)
     }
     value += user.wallet.balance
     // Force to two decimal places, and do not round.
@@ -300,12 +308,18 @@ const calculatePortfolioValue = async (userId) => {
     if (value === 0) {
         throw 'The portfolio value for the user is 0.'
     }
-   
+
+    let ret = 0.0
+    for (let i = 0; i < rets.length; ++i) {
+        ret += rets[i] * amts[i] / value // weighted return of each stock holding
+    }
+    ret = Math.trunc(ret * 10000) / 100
+
     const updateInfo = await collection.updateOne({_id: _userId}, {
         $push: {
             'wallet.portfolioValues': {
-                date: date.toDateString(), 
-                value
+                date: date.toDateString() + `${date.getHours()}:${date.getMinutes()}`, 
+                value: ret
             }
         }
     });
@@ -374,12 +388,16 @@ const addStockTransaction = async (
     if (oldShareAmount === 0) {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {'wallet.holdings.stocks': _stockId}}
+            {$push: {'wallet.holdings.stocks': stockId}}
         );
+        if (updateInfo.modifiedCount === 0) {
+            throw 'Failed to add stock to holdings array.'
+        }
     } else if (newShareAmount === 0) {
+        console.log('sold out')
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {'wallet.holdings.stocks': _stockId}}
+            {$pull: {'wallet.holdings.stocks': stockId}}
         );
     }
     if (updateInfo.matchedCount === 0) {
@@ -523,7 +541,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (pos === 'buy') {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$push: {'wallet.holdings.songs': _songId}}
+            {$push: {'wallet.holdings.songs': songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},
@@ -532,7 +550,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     } else {
         updateInfo = await collection.updateOne(
             {_id: _userId},
-            {$pull: {'wallet.holdings.songs': _songId}}
+            {$pull: {'wallet.holdings.songs': songId}}
         );
         updatedSongInfo = await songsCollection.updateOne(
             {_id: _songId},

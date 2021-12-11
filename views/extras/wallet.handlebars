@@ -13,8 +13,11 @@
     <div class = "grid-container">
 
         <div class = "asset-graph">
-            <h1 id = "total-asset">${{assets}}</h1>
-            <p id = "asset-status">You're up +$100.29 (4.93%) Today!</p>
+            {{#if profit}}
+                <p id="asset-status">You're up ${{pnl}} today! ({{total_ret}}%)</p>
+            {{else}}
+                <p id="asset-status">You're down ${{pnl}} today! ({{total_ret}}%)</p>
+            {{/if}}
             <div id = "chartDiv">
                 <canvas id="myChart"></canvas>
             </div>
@@ -27,6 +30,7 @@
                                 <th>Songs Owned </th>
                                 <th>Date Purchased</th>
                                 <th>Current Value</th>
+                                <th></th> {{!-- column for sell buttons --}}
                             </tr>
                         </thead>
                         {{#if songs}}
@@ -35,13 +39,17 @@
                                 <td class = "song-cell">
                                     <img
                                     class = "covers" 
-                                    src = "{{image}}">
+                                    src = "{{image}}"
+                                    alt = "Cover of {{name}} by {{artist}}">
                                     <p class = "song-name">{{name}}</p>
                                     <p class = "artist">{{artist}}</p>
                                     
                                 </td>
-                                <td>February 1, 2021</td>
+                                <td>{{date}}</td>
                                 <td>${{price}}</td>
+                                <td>
+                                    <button songId="{{_id}}" class="sell-song-button">Sell</button>
+                                </td>
                             </tr>
                             {{/each}}
                         {{else}}
@@ -65,7 +73,7 @@
             <table class = "summary">
                 <tr class = "wallet-row">
                     <td>Total Assets</td>
-                    <td id="total-assets" class = "money-sum">${{balance}}</td>
+                    <td id="total-assets" class = "money-sum">${{assets}}</td>
                 </tr>
                 <tr>
                     <td>Buying Power</td>
@@ -91,6 +99,9 @@
                             <td>
                                 <p>Shares:{{shares}}</p>
                                 <p class = "change">{{return}}%</p>
+                            </td>
+                            <td>
+                                <button stockid="{{id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
                     {{/each}}

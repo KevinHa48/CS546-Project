@@ -40,25 +40,14 @@ app.use('/', async (req, res, next) => {
 
 configRoutes(app);
 
-// creates an interval to keep getting the stock 
-const fetchStockPricesCallback = async () => {
+// creates an interval to keep getting the stock prices
+setTimeout(async () => {
     try {
         await industries.fetchStockPrices()
     } catch (e) {
         console.log(e)
-        return
     }
-    const allUsers = await users.getAll()
-    for (const user of allUsers) {
-        try {
-            await users.calculatePortfolioValue(user._id)
-        } catch {
-            continue
-        }
-    }
-}
-
-setTimeout(fetchStockPricesCallback)
+})
 
 let stockPriceRoutine
 setInterval(() => {
@@ -73,7 +62,22 @@ setInterval(() => {
     const market_close = new Date(`${year}-${month}-${day}T16:00:00`)
 
     if (!stockPriceRoutine && date >= market_open && date <= market_close) {
-        stockPriceRoutine = setInterval(fetchStockPricesCallback, 600000) // every 10 minutes update stock prices.
+        stockPriceRoutine = setInterval(async () => {
+            try {
+                await industries.fetchStockPrices()
+            } catch (e) {
+                console.log(e)
+                return
+            }
+            const allUsers = await users.getAll()
+            for (const user of allUsers) {
+                try {
+                    await users.calculatePortfolioValue(user._id)
+                } catch {
+                    continue
+                }
+            }
+        }, 600000) // every 10 minutes update stock prices.
     } else if (stockPriceRoutine && date > market_close) {
         clearInterval(stockPriceRoutine)
     }
