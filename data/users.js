@@ -224,7 +224,7 @@ const addBalance = async (id, amt) => {
     if (typeof amt !== 'number' || amt <= 0) {
         throw 'Added amount must be a number greater than 0.';
     }
-    let user = getById(id)
+    let user = await getById(id)
     if (!user) {
         throw 'User not founded with the provided id.'
     }
