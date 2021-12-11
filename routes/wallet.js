@@ -9,13 +9,24 @@ router.get('/', async (req, res) => {
     try {
         const username = xss(req.session.user);
         const userData = await users.getByUsername(username);
+        let assets = userData.wallet.balance
+        let portfolioValue = userData.wallet.balance
 
         /* For each song call get and query for it's object representation, then put
          that into an array to pass to hbs.*/
         const songArr = await Promise.all(
             userData.wallet.holdings.songs.map(async (song) => {
-                let songObj = await songs.get(song.toString());
-                return await getSpotifyData(songObj);
+                let songObj = await songs.get(song);
+                let result = await getSpotifyData(songObj);
+                result._id = song;
+                for (const transaction of userData.wallet.transactions.reverse()) {
+                    if (transaction._itemId === song) {
+                        result.date = transaction.datetime.toDateString()
+                        assets += result.price
+                        break 
+                    }
+                }
+                return result;
             })
         );
         // Get the current time of the day to greet the user.
@@ -43,19 +54,23 @@ router.get('/', async (req, res) => {
             })
         );
 
+        let pnl = 0.0 //profit and loss. this is the value that is shown at the top: You have made ${pnl} Today!
         let stockIds = userData.wallet.holdings.stocks;
         let stocks = [];
         for (const stockId of stockIds) {
             const {name, symbol, lastPrice} = await industries.getIndustry(
                 stockId
             );
-            console.log(lastPrice + "hhh");
             const shares = await users.getNumberOfShares(userData._id, stockId);
             if (shares === 0) continue;
+            assets += lastPrice * shares
+            portfolioValue += lastPrice * shares
             const price = await users.getAveragePrice(userData._id, stockId);
+            pnl += (lastPrice - price)
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
             stocks.push({
+                _id: stockId,
                 name,
                 symbol,
                 shares,
@@ -64,16 +79,17 @@ router.get('/', async (req, res) => {
             });
         }
 
-        const portfolioValues = userData.wallet.portfolioValues;
         res.render('extras/wallet', {
             username: userData.firstName,
-            assets: portfolioValues[portfolioValues.length - 1].value,
+            assets: assets.toFixed(2),
             time: greeting,
             stocks,
             songs: songArr,
-            balance: userData.wallet.balance,
-            portfolioValues: portfolioValues,
+            balance: userData.wallet.balance.toFixed(2),
             transactions: transactions,
+            pnl: Math.abs(pnl).toFixed(2),
+            profit: pnl >= 0,
+            total_ret: (pnl / portfolioValue * 100).toFixed(2),
         });
     } catch (e) {
         // Error here.
@@ -105,7 +121,6 @@ router.post('/songs/:id', async (req, res) => {
     } catch (e) {
         let songData = await songs.get(req.params.id);
         const songCover = await getSpotifyData(songData);
-        console.log(songData.price);
         res.render('extras/songDetails', {
             title: 'Music Details',
             songs: songData,
@@ -114,6 +129,95 @@ router.post('/songs/:id', async (req, res) => {
         });
     }
 });
+
+// Selling a song
+router.delete('/songs/:id', async (req, res) => {
+    const id = xss(req.params.id)
+    const username = req.session.user
+    let _id
+    try {
+        _id = users.getObjectId(id)
+    } catch {
+        res.status(400).json({error: 'Invalid song id.'})
+        return
+    }
+    let song
+    try {
+        song = await songs.get(id)
+    } catch {
+        res.status(404).json({error: 'Song does not exist.'})
+        return
+    }
+    let user = await users.getByUsername(username)
+    if (!(id in user.wallet.holdings.songs)) {
+        res.status(400).json({error: 'You do not own the rights to this song!'})
+        return
+    }
+    try {
+        user = await users.addSongTransaction(user._id, new Date(), id, 'sell', song.price)
+    } catch {
+        res.status(500).json({error: 'Internal Server Error'})
+        return
+    }
+    res.json({balance: user.wallet.balance})
+})
+
+// Selling shares of stock
+router.delete('/stocks/:id', async (req, res) => {
+    const id = xss(req.params.id)
+    // const username = req.session.user
+    const username = req.body.username
+    const shares = parseInt(xss(req.body.shares))
+    let _id
+    console.log(username)
+    try {
+        _id = users.getObjectId(id)
+    } catch {
+        res.status(400).json({error: 'Invalid stock id.'})
+        return
+    }
+    if (typeof shares !== 'number' || shares <= 0) {
+        res.status(400).json({error: 'Shares must be a number greater than 0.'})
+        return
+    }
+    let industry
+    try {
+        industry = await industries.getIndustry(id)
+    } catch {
+        res.status(404).json({error: 'Stock does not exist.'})
+        return
+    }
+    let user = await users.getByUsername(username)
+    console.log(id)
+    console.log(user.wallet.holdings.stocks)
+    let stockInHoldings = false
+    for (const stockId of user.wallet.holdings.stocks) {
+        if (id === stockId) {
+            stockInHoldings = true
+            break
+        }
+    }
+    if (!stockInHoldings) {
+        res.status(400).json({error: 'You do not own that stock.'})
+        return
+    }
+    const ownedShares = await users.getNumberOfShares(user._id, id)
+    if (shares > ownedShares) {
+        res.status(400).json({error: 'You cannot sell more shares than you own.'})
+        return
+    }
+    try {
+        user = await users.addStockTransaction(user._id, new Date(), id, 'sell', industry.lastPrice, shares)
+    } catch {
+        res.status(500).json({error: 'Internal Server Error'})
+        return
+    }
+    const remainingShares = await users.getNumberOfShares(user._id, id)
+    res.json({
+        balance: user.wallet.balance, // buying power will change.
+        remainingShares // for displaying remaining shares, if any
+    })
+})
 
 // Buying a stock
 router.post('/stocks/:id', async (req, res) => {
@@ -186,11 +290,33 @@ router.get('/portfolio_value', async (req, res) => {
     const username = xss(req.session.user);
     try {
         const user = await users.getByUsername(username);
-        //console.log(user);
         res.json(user.wallet.portfolioValues);
     } catch {
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
+
+router.post('/add_balance', async (req, res) => {
+    const username = xss(req.session.user)
+    const amt = parseInt(xss(req.body.amt))
+    if (typeof amt !== 'number' || amt <= 0) {
+        res.status(400).json({error: 'Amount must be a number greater than 0.'})
+        return
+    }
+    const user = await users.getByUsername(username)
+    const newBalance = user.wallet.balance + amt
+    if (newBalance > 1e6) {
+        res.status(400).json({error: "You can only add up to $1,000,000 in buying power."})
+        return
+    }
+    try {
+        await users.addBalance(user._id, amt) 
+    } catch (e) {
+        console.log(e)
+        res.status(500).json({error: e})
+        return
+    }
+    res.json({balance: newBalance})
+})
 
 module.exports = router;

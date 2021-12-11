@@ -40,7 +40,15 @@ app.use('/', async (req, res, next) => {
 
 configRoutes(app);
 
-// creates an interval to keep getting the stock 
+// creates an interval to keep getting the stock prices
+setTimeout(async () => {
+    try {
+        await industries.fetchStockPrices()
+    } catch (e) {
+        console.log(e)
+    }
+})
+
 let stockPriceRoutine
 setInterval(() => {
     const date = new Date()
@@ -49,21 +57,31 @@ setInterval(() => {
     let day = date.getDate()
     day = day >= 10 ? day.toString() : '0' + day.toString()
     const year = date.getFullYear()
+
     const market_open = new Date(`${year}-${month}-${day}T09:30:00`)
     const market_close = new Date(`${year}-${month}-${day}T16:00:00`)
+
     if (!stockPriceRoutine && date >= market_open && date <= market_close) {
         stockPriceRoutine = setInterval(async () => {
-            await industries.fetchStockPrices()
+            try {
+                await industries.fetchStockPrices()
+            } catch (e) {
+                console.log(e)
+                return
+            }
             const allUsers = await users.getAll()
             for (const user of allUsers) {
-                console.log(user._id)
-                await users.calculatePortfolioValue(user._id)
+                try {
+                    await users.calculatePortfolioValue(user._id)
+                } catch {
+                    continue
+                }
             }
         }, 600000) // every 10 minutes update stock prices.
     } else if (stockPriceRoutine && date > market_close) {
         clearInterval(stockPriceRoutine)
     }
-}, 10000) // checks every minute
+}, 10000) // checks every 10 seconds
 
 app.listen(3000, () => {
     console.log("We've now got a server!");
