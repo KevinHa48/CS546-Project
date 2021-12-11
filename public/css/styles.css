@@ -208,7 +208,7 @@ header {
     margin: 10px;
 }
 
-.login-and-signup > [type="submit"] {
+.login-and-signup > [type='submit'] {
     background: #6fdd8e;
     padding: 5px;
 }
@@ -220,7 +220,7 @@ body {
 }
 
 * {
-    font-family: "Nanum Gothic", sans-serif;
+    font-family: 'Nanum Gothic', sans-serif;
     padding: 0;
     margin: 0;
 }
@@ -381,15 +381,10 @@ th {
     border-left: 1px;
     border-right: 1px;
 } */
-th:hover {
+.table-list-header:hover {
     cursor: pointer;
     background: darkolivegreen;
 }
-/* table,
-th,
-td {
-    border: 1px solid black;
-} */
 
 thead.table-list-top-header {
     background-color: rgb(120, 192, 120);
