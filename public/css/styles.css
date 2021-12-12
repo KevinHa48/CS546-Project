@@ -96,7 +96,7 @@ header {
     justify-self: start;
     border-style: solid;
     border-color: #e3e9ed;
-    width: 350px;
+    width: 375px;
     /* overflow-x: hidden; */
     padding-top: 15px;
     /* margin-top: 50px; */
@@ -250,7 +250,7 @@ figcaption {
 }
 
 figure {
-    height: 550px;
+    height: 570px;
     width: 475px;
     background-color: white;
     padding-bottom: 16px;
