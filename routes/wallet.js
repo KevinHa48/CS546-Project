@@ -167,11 +167,13 @@ router.delete('/songs/:id', async (req, res) => {
 
 // Selling shares of stock
 router.delete('/stocks/:id', async (req, res) => {
+    console.log("here")
     const id = xss(req.params.id)
     // const username = req.session.user
     const username = req.body.username
     const shares = parseInt(xss(req.body.shares))
     let _id
+
     console.log(username)
     try {
         _id = users.getObjectId(id)

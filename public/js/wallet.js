@@ -100,8 +100,8 @@
         confirm_yes.unbind('click').on('click', function(event) {
             event.preventDefault();
             $.ajax({
-                url: `wallet/songs/${song_id}`,
-                type: 'delete',
+                type: 'DELETE',
+                url: `/wallet/songs/${song_id}`,
                 success: function() {
                     transactionStatus(true);
                     $(this).remove();
