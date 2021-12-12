@@ -12,6 +12,7 @@ header li {
 
 header li a {
     text-decoration: none;
+    color: #00578c;
 }
 
 header {
@@ -34,6 +35,15 @@ header {
     top: 0;
     height: 50px;
     width: auto;
+}
+
+#corner-balance {
+    position: absolute;
+    left: 88%;
+    top: 15px;
+    height: 50px;
+    width: auto;
+    color: #4d4d4d
 }
 
 #market-industries-img {
@@ -125,7 +135,7 @@ header {
 
 .action {
     text-transform: uppercase;
-    color: rgb(136, 136, 115);
+    color: #78785e
 }
 
 #no-tra {
@@ -160,9 +170,11 @@ header {
     background-color: white;
     margin-top: 2px;
     float: right;
+    cursor: pointer
 }
 
-.sell-song-button {
+.sell-song-button,
+.stock-confirm {
     border: solid 1.2px black;
     color: black;
     padding: 12px 25px;
@@ -181,10 +193,12 @@ header {
 
 .modal-info,
 .instruction {
-    margin-top: 50px;
+    margin-top: 35px;
 }
 
-.sell-song-button.confirm-no, .sell-song-button.confirm-yes {
+.sell-song-button.confirm-no, 
+.sell-song-button.confirm-yes,
+.stock-confirm {
     float: none;
     margin: 55px auto
 }
@@ -193,7 +207,8 @@ header {
     text-align: center;
 }
 
-#sell-song-modal {
+#sell-song-modal,
+#sell-stock-modal {
     display: none;
     position: fixed;
     z-index: 1;
@@ -204,7 +219,8 @@ header {
     background-color: rgba(0,0,0,0.4);
 }
 
-#song-modal-content {
+#song-modal-content,
+#stock-modal-content {
     background-color: white;
     margin: 15% auto;
     padding: 20px;
@@ -320,7 +336,7 @@ figcaption {
 }
 
 figure {
-    height: 550px;
+    height: 570px;
     width: 475px;
     background-color: white;
     padding-bottom: 16px;
@@ -634,4 +650,18 @@ thead.table-list-top-header {
 }
 #stock-form-contents * {
     padding-bottom: 5px;
+}
+
+#myModal{
+    padding-top: 50px;
+}
+
+.modal-backdrop {
+    display: none;
+    z-index: 1040 !important;
+}
+
+.modal-content {
+    margin: 2px auto;
+    z-index: 1100 !important;
 }

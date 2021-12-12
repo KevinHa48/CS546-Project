@@ -14,6 +14,7 @@ router.get('/', async (req, res) => {
 
         /* For each song call get and query for it's object representation, then put
          that into an array to pass to hbs.*/
+      
         const songArr = await Promise.all(
             userData.wallet.holdings.songs.map(async (song) => {
                 let songObj = await songs.get(song);
@@ -29,6 +30,7 @@ router.get('/', async (req, res) => {
                 return result;
             })
         );
+        console.log("here2");
         // Get the current time of the day to greet the user.
         const time = new Date().getHours();
         const greeting =
@@ -53,6 +55,7 @@ router.get('/', async (req, res) => {
                 return transaction;
             })
         );
+        console.log("here3");
 
         let pnl = 0.0 //profit and loss. this is the value that is shown at the top: You have made ${pnl} Today!
         let stockIds = userData.wallet.holdings.stocks;
@@ -66,7 +69,7 @@ router.get('/', async (req, res) => {
             assets += lastPrice * shares
             portfolioValue += lastPrice * shares
             const price = await users.getAveragePrice(userData._id, stockId);
-            pnl += (lastPrice - price)
+            pnl += (lastPrice - price) * shares
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
             stocks.push({
@@ -78,7 +81,7 @@ router.get('/', async (req, res) => {
                 return: ret,
             });
         }
-
+        console.log("here4");
         res.render('extras/wallet', {
             username: userData.firstName,
             assets: assets.toFixed(2),
@@ -171,8 +174,7 @@ router.delete('/songs/:id', async (req, res) => {
 router.delete('/stocks/:id', async (req, res) => {
     console.log("here")
     const id = xss(req.params.id)
-    // const username = req.session.user
-    const username = req.body.username
+    const username = req.session.user
     const shares = parseInt(xss(req.body.shares))
     let _id
 
@@ -289,6 +291,49 @@ router.post('/stocks/:id', async (req, res) => {
             regularMarketDayLow: ind.regularMarketDayLow,
             errors: errors
         })
+        return
+    }
+});
+
+router.post('/sell/stock/:id', async (req, res) => {
+    let formData = req.body;
+    //Error Check
+    if(!formData.numStockSharesToSell){
+       throw "No Input for Shares"
+    }
+    let numStockSharesToSell = parseInt(formData.numStockSharesToSell)
+    if (typeof numStockSharesToSell !== 'number') {
+        throw 'Error: Not a Number';
+    }
+    if (isNaN(numStockSharesToSell)) {
+        throw 'Error: Not a Number';
+    }
+    //Query Database for current price
+    const stockId = await users.getObjectId(req.params.id).toString();
+    let ind = await industries.getIndustry(stockId);
+    try {
+        // Grab the user to extract their ID.
+        const userInfo = await users.getByUsername(req.session.user);
+        const userId = userInfo._id.toString();
+        // Call songs transaction
+        try{
+            await users.addStockTransaction(
+                userId,
+                new Date(),
+                req.params.id,
+                'sell',
+                ind.lastPrice,
+                numStockSharesToSell
+            );
+        }
+        catch(e){
+            res.status(400).json({error: e});
+            return
+        }
+        res.redirect('/wallet');
+        return
+    } catch (e) {
+        res.status(400).json({error: e});
         return
     }
 });

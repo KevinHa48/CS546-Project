@@ -7,6 +7,7 @@
             <li><a href="/wallet">Wallet</a></li>
             <li><a href="/users/logout">Log Out</a></li>
         </ul>
+        <p id="corner-balance">Current Balance: {{balance}}</p>
     </nav>
 </header>
 <main>
@@ -16,7 +17,7 @@
         </form>
         <div class="centered">
             <h1 class="songs-description-artist">{{songs.name}} by {{songs.artist}}</h1>
-                <img class = "songs-desc-cover"  src = "{{image}}">
+                <img class = "songs-desc-cover" alt = "Album Cover" src = "{{image}}">
         </div>
     </div>
 

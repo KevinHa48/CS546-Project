@@ -13,13 +13,34 @@
     <div id = "sell-song-modal">
         <div id = "song-modal-content">
             <span id = "close">&times;</span>
-            <h3 class = "modal-header"></h3>
+            <h2 class = "modal-header"></h2>
             <p class = "modal-info"></p>
             <h3 class = "status"></h3>
             <p class = "instruction"></p>
             <div id = "selection-buttons">
                 <button class = "sell-song-button confirm-yes ">Yup, sell it!</button>
                 <button class = "sell-song-button confirm-no">Nevermind</button>
+            </div>
+        </div>
+    </div>
+    <div id = "sell-stock-modal">
+        <div id = "stock-modal-content">
+            <span id = "close">&times;</span>
+            <h2 class = "modal-header"></h2>
+            <p class = "modal-info"></p>
+            <h3 class = "status"></h3>
+            <p class = "instruction"></p>
+            <div id = "stock-sell-panel">
+                <form id = "stock-sell-form">
+                    <div>
+                        <label for="balloons">Shares</label>
+                        <input id="stock-box" type="number" name="balloons" min="1" required>
+                        <span class="validity"></span>
+                    </div>
+                    <div class = "confirm-div">
+                        <input id = "stock-confirm" type="submit">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -113,13 +134,13 @@
                                     class = "share-logo" 
                                     alt = "{{name}} Logo"
                                     src = "/public/images/stocks/{{symbol}}.png">
-                                    <p>{{symbol}}</p>
+                                    <p class = "symbol">{{symbol}}</p>
                                 </div>
                                  <p>{{return}}%</p>
                             </td>
                             <td>
-                                <p class = "rt-additional">Shares: {{shares}}</p>
-                                <button stockid="{{id}}" class="sell-stock-button">Sell</button>
+                                <p data-shares = "{{shares}}" class = "rt-additional">Shares: {{shares}}</p>
+                                <button stockid="{{_id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
                     {{/each}}

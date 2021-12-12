@@ -5,9 +5,13 @@
         add_balance_amt = $('#add-balance-amt'),
         add_balance_alert = $('#add-balance-alert')
         sell_song_btn = $('.sell-song-button')
+        sell_stock_btn = $('.sell-stock-button')
         sell_song_modal = $('#sell-song-modal')
+        sell_stock_modal = $('#sell-stock-modal')
         song_modal_content = $('#song-modal-content')
+        stock_modal_content = $('#stock-modal-content')
         close_btn = $('#close')
+
 
     add_balance_form.submit(function(event) {
         event.preventDefault()
@@ -50,16 +54,16 @@
         })
     })
 
-    function transactionStatus (status) {
+    function transactionStatus (status, type) {
         $('.modal-header').hide();
         $('.modal-info').hide();
 
         if(status) {
-            $('.status').text('Song has been successfully sold!')
+            $('.status').text(`${type} has been successfully sold!`)
             $('.instruction').text('Click X or outside this box to close.')
         }
         else {
-            $('.status').text('Song could not be sold because of an error.')
+            $('.status').text(`${type} could not be sold because of an error.`)
             $('.instruction').text('Click X or outside this box to close and retry.')
         }
 
@@ -106,11 +110,11 @@
                 url: `/wallet/songs/${song_id}`,
                 success: function() {
                     sell_btn_ref.closest('tr').remove();
-                    transactionStatus(true);
+                    transactionStatus(true, 'Song');
                     
                 },
                 error: function() {
-                    transactionStatus(false);
+                    transactionStatus(false, 'Song');
                 }
             })
             confirm_yes.hide();
@@ -125,9 +129,59 @@
         return false;
     })
 
+    sell_stock_btn.click(function(event) {
+        event.preventDefault();
+        sell_stock_modal.show();
+
+        sell_btn_ref = $(this);
+
+        $('.status').hide();
+        $('.instruction').hide();
+
+        // Grab id of stock you clicked sell on
+        let stock_id = $(this).attr('stockid');
+        let shares_owned = $(this).siblings().first().data('shares');
+
+        $('#stock-box').attr({
+            "max": shares_owned
+        })
+
+        $('.modal-header').text("Selling Confirmation");
+
+        // Grab the button's parent in order to get the relevant song info for the modal.
+        let stock_cell = $(this).parent().siblings();
+        let stock_symbol = stock_cell.find('.symbol').text();
+
+        $('.modal-info').text(`How many shares of ${stock_symbol} do you want to sell?`)
+        
+        $('.modal-header').show();
+        $('.modal-info').show();
+
+        $('#stock-sell-form').submit(function(event) {
+            let share_val = $('form').serializeArray()[0].value;
+            event.preventDefault();
+            $.ajax({
+                type: 'DELETE',
+                url: `/wallet/stocks/${stock_id}`,
+                data: {
+                    shares: share_val
+                },
+                success: function() {
+                    transactionStatus(true, 'Stock');
+                    window.location.reload()
+                },
+                error: function() {
+                    transactionStatus(false, 'Stock');
+                }
+            })
+        });
+        return false;
+    })
+
     close_btn.click(function(event) {
         event.preventDefault();
         sell_song_modal.hide();
+        sell_stock_modal.hide();
     })
 
     $(document).click(function(event) {
@@ -135,6 +189,9 @@
         // The sell-song-modal is the backdrop so technically you have to click there to hide..
         if($(event.target).is('#sell-song-modal')) {
             sell_song_modal.hide();
+        }
+        if($(event.target).is('#sell-stock-modal')) {
+            sell_stock_modal.hide();
         }
     })
 

@@ -354,13 +354,13 @@ const addStockTransaction = async (
         throw 'Shares must be a number greater than 0.';
     }
     const user = await getById(userId);
-    if (price * shares > user.wallet.balance) {
+    if (pos === 'buy' && price * shares > user.wallet.balance) {
         throw 'User does not have enough money to make this transaction.';
     }
     const oldShareAmount = await getNumberOfShares(userId, stockId);
     const newShareAmount = oldShareAmount + shares;
-    if (newShareAmount < 0) {
-        throw 'User cannot sell more shares than they own.';
+    if (pos === 'sell' && (shares <= 0 || shares > oldShareAmount)) {
+        throw 'User cannot sell that many shares.';
     }
     const transaction = {
         _id: new ObjectId(),
