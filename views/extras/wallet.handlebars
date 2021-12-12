@@ -10,9 +10,22 @@
     </nav>
 </header>
     <h1 id = "greeting">Good {{time}}, {{username}}.</h1>
+    <div id = "sell-song-modal">
+        <div id = "song-modal-content">
+            <span id = "close">&times;</span>
+            <h3 class = "modal-header"></h3>
+            <p class = "modal-info"></p>
+            <h3 class = "status"></h3>
+            <p class = "instruction"></p>
+            <div id = "selection-buttons">
+                <button class = "sell-song-button confirm-yes ">Yup, sell it!</button>
+                <button class = "sell-song-button confirm-no">Nevermind</button>
+            </div>
+        </div>
+    </div>
     <div class = "grid-container">
-
         <div class = "asset-graph">
+            <h1 id = "total-asset">${{assets}}</h1>
             {{#if profit}}
                 <p id="asset-status">You're up ${{pnl}} today! ({{total_ret}}%)</p>
             {{else}}
@@ -29,7 +42,7 @@
                             <tr class = "e">
                                 <th>Songs Owned </th>
                                 <th>Date Purchased</th>
-                                <th>Current Value</th>
+                                <th class = "c-value">Current Value</th>
                                 <th></th> {{!-- column for sell buttons --}}
                             </tr>
                         </thead>
@@ -43,10 +56,9 @@
                                     alt = "Cover of {{name}} by {{artist}}">
                                     <p class = "song-name">{{name}}</p>
                                     <p class = "artist">{{artist}}</p>
-                                    
                                 </td>
                                 <td>{{date}}</td>
-                                <td>${{price}}</td>
+                                <td class = "c-value">${{price}}</td>
                                 <td>
                                     <button songId="{{_id}}" class="sell-song-button">Sell</button>
                                 </td>
@@ -62,7 +74,16 @@
                     </table>
                 </div>  
             </div>
-
+            <div>
+                <form id="add-balance-form" method="POST" action="/wallet/add_balance">
+                    <p id="add-balance-alert" hidden></p>
+                    <label>
+                        Add Balance:
+                        <input id="add-balance-amt" type="number" value="amt" placeholder="Enter $ Amount" required>
+                        <input type="submit" value="Submit">
+                    </label>
+                </form>
+            </div>
         </div>
          
         <!--------- End Asset Graph ------------->
@@ -91,16 +112,13 @@
                                     <img
                                     class = "share-logo" 
                                     alt = "{{name}} Logo"
-                                    src = "/public/images/stocks/{{name}}.png">
+                                    src = "/public/images/stocks/{{symbol}}.png">
                                     <p>{{symbol}}</p>
                                 </div>
-                                <p class = "action">{{pos}}</p>
+                                 <p>{{return}}%</p>
                             </td>
                             <td>
-                                <p>Shares:{{shares}}</p>
-                                <p class = "change">{{return}}%</p>
-                            </td>
-                            <td>
+                                <p class = "rt-additional">Shares: {{shares}}</p>
                                 <button stockid="{{id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
@@ -126,7 +144,7 @@
                                         <img
                                         class = "share-logo" 
                                         alt = "{{name}} Logo"
-                                        src = "/public/images/stocks/{{name}}.png">
+                                        src = "/public/images/stocks/{{symbol}}.png">
                                         <p>{{symbol}}</p>
                                     </div>
                                     <p class = "action">{{pos}}</p>
@@ -158,16 +176,6 @@
                     </tr>
                 {{/if}}
             </table>
-        </div>
-        <div>
-            <form id="add-balance-form" method="POST" action="/wallet/add_balance">
-                <p id="add-balance-alert" hidden></p>
-                <label>
-                    Add Balance:
-                    <input id="add-balance-amt" type="number" value="amt" placeholder="Enter $ Amount" required>
-                    <input type="submit" value="Submit">
-                </label>
-            </form>
         </div>
     </div>
     <script src = "/public/js/portfolio.js"></script>

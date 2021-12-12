@@ -86,7 +86,7 @@ router.get('/', async (req, res) => {
             stocks,
             songs: songArr,
             balance: userData.wallet.balance.toFixed(2),
-            transactions: transactions,
+            transactions: transactions.slice(0, 4),
             pnl: Math.abs(pnl).toFixed(2),
             profit: pnl >= 0,
             total_ret: (pnl / portfolioValue * 100).toFixed(2),
@@ -134,10 +134,11 @@ router.post('/songs/:id', async (req, res) => {
 router.delete('/songs/:id', async (req, res) => {
     const id = xss(req.params.id)
     const username = req.session.user
-    let _id
+    let _id;
     try {
         _id = users.getObjectId(id)
-    } catch {
+    } catch(e) {
+        console.log(e);
         res.status(400).json({error: 'Invalid song id.'})
         return
     }
@@ -145,6 +146,7 @@ router.delete('/songs/:id', async (req, res) => {
     try {
         song = await songs.get(id)
     } catch {
+        console.log(e);
         res.status(404).json({error: 'Song does not exist.'})
         return
     }
@@ -156,6 +158,7 @@ router.delete('/songs/:id', async (req, res) => {
     try {
         user = await users.addSongTransaction(user._id, new Date(), id, 'sell', song.price)
     } catch {
+        console.log(e);
         res.status(500).json({error: 'Internal Server Error'})
         return
     }

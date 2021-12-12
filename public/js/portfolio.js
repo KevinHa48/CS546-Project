@@ -17,6 +17,7 @@ function getChart(portfolioData) {
     const data = {
         labels: dates,
         datasets: [{
+            label: 'Total Assets',
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             data: values,
