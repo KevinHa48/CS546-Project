@@ -2,6 +2,8 @@ const express = require("express");
 const songsData = require("../data/songs");
 const {getSpotifyData} = require("../utils/spotifyAPI");
 const router = express.Router();
+const {users, songs, industries} = require('../data');
+const xss = require('xss');
 
 function validateStringParams(param, paramName) {
     if (!param) {
@@ -16,10 +18,15 @@ function validateStringParams(param, paramName) {
 }
 router.get("/", async (req, res) => {
     try {
+        const username = xss(req.session.user);
+        const userData = await users.getByUsername(username);
+        let assets = userData.wallet.balance
         let songsList = await songsData.getAll();
         res.render("extras/songs", {
             title: "Music Rights Page",
             songs: songsList,
+            balance: assets.toFixed(2)
+            
         });
     } catch (e) {
         res.render("extras/error", {
@@ -36,10 +43,14 @@ router.get("/:id", async (req, res) => {
         validateStringParams(req.params.id, "Song Id");
         let songs = await songsData.get(req.params.id);
         const songCover = await getSpotifyData(songs);
+        const username = xss(req.session.user);
+        const userData = await users.getByUsername(username);
+        let assets = userData.wallet.balance
         res.render("extras/songDetails", {
             title: "Music Details",
             songs: songs,
             image: songCover.image,
+            balance: assets.toFixed(2)
         });
     } catch (e) {
         res.render("extras/error", {

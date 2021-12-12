@@ -286,6 +286,49 @@ router.post('/stocks/:id', async (req, res) => {
     }
 });
 
+router.post('/sell/stock/:id', async (req, res) => {
+    let formData = req.body;
+    //Error Check
+    if(!formData.numStockSharesToSell){
+       throw "No Input for Shares"
+    }
+    let numStockSharesToSell = parseInt(formData.numStockSharesToSell)
+    if (typeof numStockSharesToSell !== 'number') {
+        throw 'Error: Not a Number';
+    }
+    if (isNaN(numStockSharesToSell)) {
+        throw 'Error: Not a Number';
+    }
+    //Query Database for current price
+    const stockId = await users.getObjectId(req.params.id).toString();
+    let ind = await industries.getIndustry(stockId);
+    try {
+        // Grab the user to extract their ID.
+        const userInfo = await users.getByUsername(req.session.user);
+        const userId = userInfo._id.toString();
+        // Call songs transaction
+        try{
+            await users.addStockTransaction(
+                userId,
+                new Date(),
+                req.params.id,
+                'sell',
+                ind.lastPrice,
+                numStockSharesToSell
+            );
+        }
+        catch(e){
+            res.status(400).json({error: e});
+            return
+        }
+        res.redirect('/wallet');
+        return
+    } catch (e) {
+        res.status(400).json({error: e});
+        return
+    }
+});
+
 router.get('/portfolio_value', async (req, res) => {
     const username = xss(req.session.user);
     try {
