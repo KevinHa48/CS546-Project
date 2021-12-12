@@ -70,6 +70,8 @@
     sell_song_btn.click(function(event) {
         sell_song_modal.show();
 
+        sell_btn_ref = $(this);
+
         $('.status').hide();
         $('.instruction').hide();
 
@@ -103,8 +105,9 @@
                 type: 'DELETE',
                 url: `/wallet/songs/${song_id}`,
                 success: function() {
+                    sell_btn_ref.closest('tr').remove();
                     transactionStatus(true);
-                    $(this).remove();
+                    
                 },
                 error: function() {
                     transactionStatus(false);

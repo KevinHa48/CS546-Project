@@ -151,14 +151,16 @@ router.delete('/songs/:id', async (req, res) => {
         return
     }
     let user = await users.getByUsername(username)
-    if (!(id in user.wallet.holdings.songs)) {
+    if (!(user.wallet.holdings.songs.includes(id))) {
+        console.log(id);
+        console.log(user.wallet.holdings.songs)
         res.status(400).json({error: 'You do not own the rights to this song!'})
         return
     }
     try {
         user = await users.addSongTransaction(user._id, new Date(), id, 'sell', song.price)
-    } catch {
-        console.log(e);
+    } catch(e) {
+        console.log(e)
         res.status(500).json({error: 'Internal Server Error'})
         return
     }

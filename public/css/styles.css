@@ -73,7 +73,7 @@ header {
     display: grid;
     grid-gap: 90px;
     grid-template-columns: auto auto;
-    grid-template-rows: 10px auto;
+    grid-template-rows: 1090px auto;
     justify-items: stretch;
 }
 
@@ -140,13 +140,13 @@ header {
 .rt-additional {
     float: right;
     text-align: right;
-    padding-bottom: 7.5px;
+    margin-bottom: 7.5px;
     width: 150px;
 }
 
 .change {
     color: green;
-    margin-top: 7.5px;
+    margin-top: 25.5px;
     text-align: right;
 }
 

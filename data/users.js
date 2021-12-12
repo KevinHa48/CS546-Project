@@ -510,7 +510,7 @@ const addSongTransaction = async (userId, datetime, songId, pos, price) => {
     if (pos === 'buy' && user.wallet.balance < price) {
         throw 'User cannot afford to buy the rights to this music.';
     }
-    if (pos === 'sell' && !(songId in user.wallet.holdings.songs)) {
+    if (pos === 'sell' && !(user.wallet.holdings.songs.includes(songId))) {
         throw 'User does not own the rights to the music that they are trying to sell.';
     }
 
