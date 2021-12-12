@@ -13,13 +13,15 @@
     <div class = "grid-container">
 
         <div class = "asset-graph">
-            <h1 id = "total-asset">${{assets}}</h1>
-            <p id = "asset-status">You're up +$100.29 (4.93%) Today!</p>
+            {{#if profit}}
+                <p id="asset-status">You're up ${{pnl}} today! ({{total_ret}}%)</p>
+            {{else}}
+                <p id="asset-status">You're down ${{pnl}} today! ({{total_ret}}%)</p>
+            {{/if}}
             <div id = "chartDiv">
                 <canvas id="myChart"></canvas>
             </div>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
             <div class = "owned-songs">
                 <div class = "carousel">
                     <table class = "song-carousel">
@@ -28,6 +30,7 @@
                                 <th>Songs Owned </th>
                                 <th>Date Purchased</th>
                                 <th>Current Value</th>
+                                <th></th> {{!-- column for sell buttons --}}
                             </tr>
                         </thead>
                         {{#if songs}}
@@ -36,13 +39,34 @@
                                 <td class = "song-cell">
                                     <img
                                     class = "covers" 
-                                    src = "{{image}}">
+                                    src = "{{image}}"
+                                    alt = "Cover of {{name}} by {{artist}}">
                                     <p class = "song-name">{{name}}</p>
                                     <p class = "artist">{{artist}}</p>
                                     
                                 </td>
-                                <td>February 1, 2021</td>
+                                <td>{{date}}</td>
                                 <td>${{price}}</td>
+                                <td>
+                                    <button songId="{{_id}}" class="sell-song-button" data-toggle="modal" data-target="#myModal">Sell</button>
+                                    <div id="myModal" class="modal fade" style="z-index: 9999;" role="dialog">
+                                    <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title">Modal Header</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Some text in the modal.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </td>
                             </tr>
                             {{/each}}
                         {{else}}
@@ -66,11 +90,11 @@
             <table class = "summary">
                 <tr class = "wallet-row">
                     <td>Total Assets</td>
-                    <td class = "money-sum">${{assets}}</td>
+                    <td id="total-assets" class = "money-sum">${{assets}}</td>
                 </tr>
                 <tr>
                     <td>Buying Power</td>
-                    <td class = "money-sum">${{balance}}</td>
+                    <td id="buying-power" class = "money-sum">${{balance}}</td>
                 </tr>
             </table>
             <h3 class = "sb-headers">Shares</h3>
@@ -84,7 +108,7 @@
                                     <img
                                     class = "share-logo" 
                                     alt = "{{name}} Logo"
-                                    src = "/public/images/stocks/{{name}}.png">
+                                    src = "/public/images/stocks/{{symbol}}.png">
                                     <p>{{symbol}}</p>
                                 </div>
                                 <p class = "action">{{pos}}</p>
@@ -92,6 +116,27 @@
                             <td>
                                 <p>Shares:{{shares}}</p>
                                 <p class = "change">{{return}}%</p>
+                            </td>
+                            <td>
+                                <button stockid="{{id}}" class="sell-stock-button" data-toggle="modal" data-target="#myModal">Sell</button>
+                                <div id="myModal" class="modal fade" style="z-index: 9999;" role="dialog">
+                                    <div class="modal-dialog">
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title">Are you sure?</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="sell-stock" action="/wallet/sell/stock/{{_id}}" method="POST">
+                                                    <label for="numStockSharesToSell">How many stocks would you like to sell?{{id}}</label>
+                                                    <input type="text" name="numStockSharesToSell" id="numStockSharesToSell">
+                                                    <button type="submit">Submit</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     {{/each}}
@@ -116,7 +161,7 @@
                                         <img
                                         class = "share-logo" 
                                         alt = "{{name}} Logo"
-                                        src = "/public/images/stocks/{{name}}.png">
+                                        src = "/public/images/stocks/{{symbol}}.png">
                                         <p>{{symbol}}</p>
                                     </div>
                                     <p class = "action">{{pos}}</p>
@@ -149,5 +194,16 @@
                 {{/if}}
             </table>
         </div>
+        <div>
+            <form id="add-balance-form" method="POST" action="/wallet/add_balance">
+                <p id="add-balance-alert" hidden></p>
+                <label>
+                    Add Balance:
+                    <input id="add-balance-amt" type="number" value="amt" placeholder="Enter $ Amount" required>
+                    <input type="submit" value="Submit">
+                </label>
+            </form>
+        </div>
     </div>
     <script src = "/public/js/portfolio.js"></script>
+    <script src = "/public/js/wallet.js"></script>

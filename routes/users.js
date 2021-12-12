@@ -57,6 +57,7 @@ router.post('/signup', async (req, res) => {
     let age = xss(req.body.age)
     let email = xss(req.body.email)
     let username = xss(req.body.username)
+    username = username.toLowerCase()
     let password = xss(req.body.password)
     let passwordCopy = xss(req.body.passwordCopy)
     let errors = []

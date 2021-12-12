@@ -36,6 +36,15 @@ header {
     width: auto;
 }
 
+#corner-balance {
+    position: absolute;
+    left: 88%;
+    top: 15px;
+    height: 50px;
+    width: auto;
+    color: #4d4d4d
+}
+
 #market-industries-img {
     height: 500px;
     width: auto;
@@ -87,7 +96,7 @@ header {
     justify-self: start;
     border-style: solid;
     border-color: #e3e9ed;
-    width: 350px;
+    width: 375px;
     /* overflow-x: hidden; */
     padding-top: 15px;
     /* margin-top: 50px; */
@@ -241,7 +250,7 @@ figcaption {
 }
 
 figure {
-    height: 550px;
+    height: 570px;
     width: 475px;
     background-color: white;
     padding-bottom: 16px;
@@ -555,4 +564,18 @@ thead.table-list-top-header {
 }
 #stock-form-contents * {
     padding-bottom: 5px;
+}
+
+#myModal{
+    padding-top: 50px;
+}
+
+.modal-backdrop {
+    display: none;
+    z-index: 1040 !important;
+}
+
+.modal-content {
+    margin: 2px auto;
+    z-index: 1100 !important;
 }
