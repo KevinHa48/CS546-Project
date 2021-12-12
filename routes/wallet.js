@@ -30,7 +30,6 @@ router.get('/', async (req, res) => {
                 return result;
             })
         );
-        console.log("here2");
         // Get the current time of the day to greet the user.
         const time = new Date().getHours();
         const greeting =
@@ -55,7 +54,6 @@ router.get('/', async (req, res) => {
                 return transaction;
             })
         );
-        console.log("here3");
 
         let pnl = 0.0 //profit and loss. this is the value that is shown at the top: You have made ${pnl} Today!
         let stockIds = userData.wallet.holdings.stocks;
@@ -81,7 +79,6 @@ router.get('/', async (req, res) => {
                 return: ret,
             });
         }
-        console.log("here4");
         res.render('extras/wallet', {
             username: userData.firstName,
             assets: assets.toFixed(2),
@@ -93,6 +90,7 @@ router.get('/', async (req, res) => {
             pnl: Math.abs(pnl).toFixed(2),
             profit: pnl >= 0,
             total_ret: (pnl / portfolioValue * 100).toFixed(2),
+            title: "Wallet"
         });
     } catch (e) {
         // Error here.

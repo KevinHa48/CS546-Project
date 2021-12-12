@@ -10,7 +10,7 @@
         sell_stock_modal = $('#sell-stock-modal')
         song_modal_content = $('#song-modal-content')
         stock_modal_content = $('#stock-modal-content')
-        close_btn = $('#close')
+        close_btn = $('.close')
 
 
     add_balance_form.submit(function(event) {
@@ -139,7 +139,7 @@
         $('.instruction').hide();
 
         // Grab id of stock you clicked sell on
-        let stock_id = $(this).attr('stockid');
+        let stock_id = $(this).attr('id');
         let shares_owned = $(this).siblings().first().data('shares');
 
         $('#stock-box').attr({

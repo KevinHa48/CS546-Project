@@ -12,7 +12,7 @@
     <h1 id = "greeting">Good {{time}}, {{username}}.</h1>
     <div id = "sell-song-modal">
         <div id = "song-modal-content">
-            <span id = "close">&times;</span>
+            <span class = "close">&times;</span>
             <h2 class = "modal-header"></h2>
             <p class = "modal-info"></p>
             <h3 class = "status"></h3>
@@ -25,7 +25,7 @@
     </div>
     <div id = "sell-stock-modal">
         <div id = "stock-modal-content">
-            <span id = "close">&times;</span>
+            <span class = "close">&times;</span>
             <h2 class = "modal-header"></h2>
             <p class = "modal-info"></p>
             <h3 class = "status"></h3>
@@ -33,7 +33,7 @@
             <div id = "stock-sell-panel">
                 <form id = "stock-sell-form">
                     <div>
-                        <label for="balloons">Shares</label>
+                        <label for="stock-box">Shares</label>
                         <input id="stock-box" type="number" name="balloons" min="1" required>
                         <span class="validity"></span>
                     </div>
@@ -98,16 +98,12 @@
             <div>
                 <form id="add-balance-form" method="POST" action="/wallet/add_balance">
                     <p id="add-balance-alert" hidden></p>
-                    <label>
-                        Add Balance:
-                        <input id="add-balance-amt" type="number" value="amt" placeholder="Enter $ Amount" required>
-                        <input type="submit" value="Submit">
-                    </label>
+                    <label for = "add-balance-amt">Add Balance:</label>
+                     <input id="add-balance-amt" type="number" placeholder="Enter $ Amount" required>
+                    <input type="submit">
                 </form>
             </div>
         </div>
-         
-        <!--------- End Asset Graph ------------->
 
         <div class = "sidebar">
             <h3 class = "sb-headers"> Wallet</h3>
@@ -140,7 +136,7 @@
                             </td>
                             <td>
                                 <p data-shares = "{{shares}}" class = "rt-additional">Shares: {{shares}}</p>
-                                <button stockid="{{_id}}" class="sell-stock-button">Sell</button>
+                                <button id="{{_id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
                     {{/each}}

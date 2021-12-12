@@ -38,8 +38,6 @@
                 <h2 class="songs-description-headings">Last Sold Price</h2>
                 <h3 class="songs-description-values">${{songs.lastSoldPrice}}</h3>
             
-                <h2 class="songs-description-headings">currently Available</h2>
-                <h3 class="songs-description-values">{{songs.currentlyAvailable}}</h3>
             </div>
             <form id="buy-songs" action="/wallet/songs/{{songs._id}}" method="POST">
                 <button type="submit" class="buy-songs">Buy Now</button>
@@ -47,7 +45,7 @@
             {{#if errors}}
                 <p>{{errors}}</p>
             {{/if}}
-        </div>
     </div>
+   
 
 </main>
