@@ -83,7 +83,7 @@ header {
     display: grid;
     grid-gap: 90px;
     grid-template-columns: auto auto;
-    grid-template-rows: 975px 200px;
+    grid-template-rows: 1090px auto;
     justify-items: stretch;
 }
 
@@ -97,7 +97,7 @@ header {
     justify-self: start;
     border-style: solid;
     border-color: #e3e9ed;
-    width: 375px;
+    width: 350px;
     /* overflow-x: hidden; */
     padding-top: 15px;
     /* margin-top: 50px; */
@@ -135,7 +135,7 @@ header {
 
 .action {
     text-transform: uppercase;
-    color: rgb(136, 136, 115);
+    color: #78785e
 }
 
 #no-tra {
@@ -148,14 +148,99 @@ header {
 }
 
 .rt-additional {
+    float: right;
     text-align: right;
+    margin-bottom: 7.5px;
     width: 150px;
 }
 
 .change {
     color: green;
-    margin-top: 7.5px;
+    margin-top: 25.5px;
     text-align: right;
+}
+
+.sell-stock-button {
+    border: solid 1.2px black;
+    color: black;
+    padding: 3px 8.75px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 10pt;
+    background-color: white;
+    margin-top: 2px;
+    float: right;
+    cursor: pointer
+}
+
+.sell-song-button,
+.stock-confirm {
+    border: solid 1.2px black;
+    color: black;
+    padding: 12px 25px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 10pt;
+    background-color: white;
+    float: right;
+    cursor: pointer
+}
+
+.modal-header,
+.status {
+    margin-top: 7px;
+}
+
+.modal-info,
+.instruction {
+    margin-top: 35px;
+}
+
+.sell-song-button.confirm-no, 
+.sell-song-button.confirm-yes,
+.stock-confirm {
+    float: none;
+    margin: 55px auto
+}
+
+.c-value {
+    text-align: center;
+}
+
+#sell-song-modal,
+#sell-stock-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#song-modal-content,
+#stock-modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 550px;
+    height: 200px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* Owned songs CSS begins */

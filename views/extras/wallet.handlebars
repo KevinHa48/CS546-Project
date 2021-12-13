@@ -10,9 +10,43 @@
     </nav>
 </header>
     <h1 id = "greeting">Good {{time}}, {{username}}.</h1>
+    <div id = "sell-song-modal">
+        <div id = "song-modal-content">
+            <span class = "close">&times;</span>
+            <h2 class = "modal-header"></h2>
+            <p class = "modal-info"></p>
+            <h3 class = "status"></h3>
+            <p class = "instruction"></p>
+            <div id = "selection-buttons">
+                <button class = "sell-song-button confirm-yes ">Yup, sell it!</button>
+                <button class = "sell-song-button confirm-no">Nevermind</button>
+            </div>
+        </div>
+    </div>
+    <div id = "sell-stock-modal">
+        <div id = "stock-modal-content">
+            <span class = "close">&times;</span>
+            <h2 class = "modal-header"></h2>
+            <p class = "modal-info"></p>
+            <h3 class = "status"></h3>
+            <p class = "instruction"></p>
+            <div id = "stock-sell-panel">
+                <form id = "stock-sell-form">
+                    <div>
+                        <label for="stock-box">Shares</label>
+                        <input id="stock-box" type="number" name="balloons" min="1" required>
+                        <span class="validity"></span>
+                    </div>
+                    <div class = "confirm-div">
+                        <input id = "stock-confirm" type="submit">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class = "grid-container">
-
         <div class = "asset-graph">
+            <h1 id = "total-asset">${{assets}}</h1>
             {{#if profit}}
                 <p id="asset-status">You're up ${{pnl}} today! ({{total_ret}}%)</p>
             {{else}}
@@ -29,7 +63,7 @@
                             <tr class = "e">
                                 <th>Songs Owned </th>
                                 <th>Date Purchased</th>
-                                <th>Current Value</th>
+                                <th class = "c-value">Current Value</th>
                                 <th></th> {{!-- column for sell buttons --}}
                             </tr>
                         </thead>
@@ -43,29 +77,11 @@
                                     alt = "Cover of {{name}} by {{artist}}">
                                     <p class = "song-name">{{name}}</p>
                                     <p class = "artist">{{artist}}</p>
-                                    
                                 </td>
                                 <td>{{date}}</td>
-                                <td>${{price}}</td>
+                                <td class = "c-value">${{price}}</td>
                                 <td>
-                                    <button songId="{{_id}}" class="sell-song-button" data-toggle="modal" data-target="#myModal">Sell</button>
-                                    <div id="myModal" class="modal fade" style="z-index: 9999;" role="dialog">
-                                    <div class="modal-dialog">
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">Modal Header</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Some text in the modal.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <button songId="{{_id}}" class="sell-song-button">Sell</button>
                                 </td>
                             </tr>
                             {{/each}}
@@ -79,10 +95,15 @@
                     </table>
                 </div>  
             </div>
-
+            <div>
+                <form id="add-balance-form" method="POST" action="/wallet/add_balance">
+                    <p id="add-balance-alert" hidden></p>
+                    <label for = "add-balance-amt">Add Balance:</label>
+                     <input id="add-balance-amt" type="number" placeholder="Enter $ Amount" required>
+                    <input type="submit">
+                </form>
+            </div>
         </div>
-         
-        <!--------- End Asset Graph ------------->
 
         <div class = "sidebar">
             <h3 class = "sb-headers"> Wallet</h3>
@@ -109,34 +130,13 @@
                                     class = "share-logo" 
                                     alt = "{{name}} Logo"
                                     src = "/public/images/stocks/{{symbol}}.png">
-                                    <p>{{symbol}}</p>
+                                    <p class = "symbol">{{symbol}}</p>
                                 </div>
-                                <p class = "action">{{pos}}</p>
+                                 <p>{{return}}%</p>
                             </td>
                             <td>
-                                <p>Shares:{{shares}}</p>
-                                <p class = "change">{{return}}%</p>
-                            </td>
-                            <td>
-                                <button stockid="{{id}}" class="sell-stock-button" data-toggle="modal" data-target="#myModal">Sell</button>
-                                <div id="myModal" class="modal fade" style="z-index: 9999;" role="dialog">
-                                    <div class="modal-dialog">
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">Are you sure?</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form id="sell-stock" action="/wallet/sell/stock/{{_id}}" method="POST">
-                                                    <label for="numStockSharesToSell">How many stocks would you like to sell?{{id}}</label>
-                                                    <input type="text" name="numStockSharesToSell" id="numStockSharesToSell">
-                                                    <button type="submit">Submit</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p data-shares = "{{shares}}" class = "rt-additional">Shares: {{shares}}</p>
+                                <button id="{{_id}}" class="sell-stock-button">Sell</button>
                             </td>
                         </tr>
                     {{/each}}
@@ -193,16 +193,6 @@
                     </tr>
                 {{/if}}
             </table>
-        </div>
-        <div>
-            <form id="add-balance-form" method="POST" action="/wallet/add_balance">
-                <p id="add-balance-alert" hidden></p>
-                <label>
-                    Add Balance:
-                    <input id="add-balance-amt" type="number" value="amt" placeholder="Enter $ Amount" required>
-                    <input type="submit" value="Submit">
-                </label>
-            </form>
         </div>
     </div>
     <script src = "/public/js/portfolio.js"></script>

@@ -14,6 +14,7 @@ router.get('/', async (req, res) => {
 
         /* For each song call get and query for it's object representation, then put
          that into an array to pass to hbs.*/
+      
         const songArr = await Promise.all(
             userData.wallet.holdings.songs.map(async (song) => {
                 let songObj = await songs.get(song);
@@ -66,7 +67,7 @@ router.get('/', async (req, res) => {
             assets += lastPrice * shares
             portfolioValue += lastPrice * shares
             const price = await users.getAveragePrice(userData._id, stockId);
-            pnl += (lastPrice - price)
+            pnl += (lastPrice - price) * shares
             let ret = (lastPrice - price) / price;
             ret = Math.trunc(ret * 10000) / 100; // in terms of %, contains two decimal places.
             stocks.push({
@@ -79,6 +80,14 @@ router.get('/', async (req, res) => {
             });
         }
 
+        for (const transaction of userData.wallet.transactions) {
+            const today = (new Date()).toDateString()
+            if (transaction.pos !== 'sell' || transaction.datetime.toDateString() !== today) {
+                continue
+            }
+            pnl += transaction.pnl
+        }
+
         res.render('extras/wallet', {
             username: userData.firstName,
             assets: assets.toFixed(2),
@@ -86,10 +95,11 @@ router.get('/', async (req, res) => {
             stocks,
             songs: songArr,
             balance: userData.wallet.balance.toFixed(2),
-            transactions: transactions,
+            transactions: transactions.slice(0, 4),
             pnl: Math.abs(pnl).toFixed(2),
             profit: pnl >= 0,
-            total_ret: (pnl / portfolioValue * 100).toFixed(2),
+            total_ret: pnl !== 0 ? (pnl / portfolioValue * 100).toFixed(2) : '0.00',
+            title: "Wallet"
         });
     } catch (e) {
         // Error here.
@@ -134,10 +144,11 @@ router.post('/songs/:id', async (req, res) => {
 router.delete('/songs/:id', async (req, res) => {
     const id = xss(req.params.id)
     const username = req.session.user
-    let _id
+    let _id;
     try {
         _id = users.getObjectId(id)
-    } catch {
+    } catch(e) {
+        console.log(e);
         res.status(400).json({error: 'Invalid song id.'})
         return
     }
@@ -145,17 +156,20 @@ router.delete('/songs/:id', async (req, res) => {
     try {
         song = await songs.get(id)
     } catch {
+        console.log(e);
         res.status(404).json({error: 'Song does not exist.'})
         return
     }
     let user = await users.getByUsername(username)
-    if (!(id in user.wallet.holdings.songs)) {
+    if (!(user.wallet.holdings.songs.includes(id))) {
+        console.log(id);
         res.status(400).json({error: 'You do not own the rights to this song!'})
         return
     }
     try {
         user = await users.addSongTransaction(user._id, new Date(), id, 'sell', song.price)
-    } catch {
+    } catch(e) {
+        console.log(e)
         res.status(500).json({error: 'Internal Server Error'})
         return
     }
@@ -165,11 +179,10 @@ router.delete('/songs/:id', async (req, res) => {
 // Selling shares of stock
 router.delete('/stocks/:id', async (req, res) => {
     const id = xss(req.params.id)
-    // const username = req.session.user
-    const username = req.body.username
+    const username = req.session.user
     const shares = parseInt(xss(req.body.shares))
     let _id
-    console.log(username)
+
     try {
         _id = users.getObjectId(id)
     } catch {
@@ -188,8 +201,6 @@ router.delete('/stocks/:id', async (req, res) => {
         return
     }
     let user = await users.getByUsername(username)
-    console.log(id)
-    console.log(user.wallet.holdings.stocks)
     let stockInHoldings = false
     for (const stockId of user.wallet.holdings.stocks) {
         if (id === stockId) {
@@ -333,6 +344,9 @@ router.get('/portfolio_value', async (req, res) => {
     const username = xss(req.session.user);
     try {
         const user = await users.getByUsername(username);
+        let portfolioValues = user.wallet.portfolioValues.filter(portfolioValue => {
+            portfolioValue.date === (new Date()).toDateString()
+        })
         res.json(user.wallet.portfolioValues);
     } catch {
         res.status(500).json({error: 'Internal Server Error'});

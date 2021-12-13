@@ -34,7 +34,6 @@ View you wallet at:
 http://localhost:3000/wallet
 
 
-
 # Demo
 
 Home Page for our site:

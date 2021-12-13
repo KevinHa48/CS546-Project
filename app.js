@@ -73,11 +73,11 @@ setInterval(() => {
             for (const user of allUsers) {
                 try {
                     await users.calculatePortfolioValue(user._id)
-                } catch {
+                } catch (e) {
                     continue
                 }
             }
-        }, 600000) // every 10 minutes update stock prices.
+        }, 60000) // every minute update stock prices.
     } else if (stockPriceRoutine && date > market_close) {
         clearInterval(stockPriceRoutine)
     }

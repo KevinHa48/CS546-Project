@@ -11,7 +11,8 @@ router.get('/', async (req, res) => {
     let assets = userData.wallet.balance
     res.render('extras/industry', {
         industries: stockList,
-        balance: assets.toFixed(2)
+        balance: assets.toFixed(2),
+        title: "Industries"
     })
 })
 

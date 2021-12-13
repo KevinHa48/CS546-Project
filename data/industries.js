@@ -96,7 +96,7 @@ const fetchStockPrices = async () => {
             symbols: tickers.reduce((tickerA, tickerB) => `${tickerA},${tickerB}`, '')
         },
         headers: {
-            'x-api-key': '2nfXYspbXx3A7r4xMA16Q5pFkfJT5I0N4GTCz3BC'
+            'x-api-key': 'cIbXzdZfgs4mpo8tDVy3S3gbjIELpOYqaNJuYhKn'
         }
     })
     const stockData = response.data.quoteResponse.result

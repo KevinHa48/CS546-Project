@@ -37,7 +37,6 @@
             errors = []
         signup_errors.hide()
         signup_error_list.empty()
-        console.log('here')
         if (firstname.match('[^A-Za-z]+')) {
             errors.push('First name should only contain letters.')
         }
@@ -56,7 +55,6 @@
         if (password.length < 8 || password.match('[ ]+')) {
             errors.push('Password must be at least 8 characters long and cannot contain spaces.')
         }
-        console.log(password, password_copy)
         if (password !== password_copy) {
             errors.push('The two passwords do no match.')
         }

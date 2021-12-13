@@ -18,6 +18,7 @@ router.get('/:id', async (req, res) => {
         regularMarketPrice: ind.lastPrice,
         regularMarketDayHigh: ind.regularMarketDayHigh,
         regularMarketDayLow: ind.regularMarketDayLow,
+        title: "Stocks"
     })
 })
 
