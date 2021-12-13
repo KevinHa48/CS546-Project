@@ -1,9 +1,19 @@
 const connection = require('../config/mongoConnection');
 const songsData = require('../data/songs');
+const usersData = require('../data/users')
+const {songs, users} = require('../config/mongoCollection');
 
 async function main() {
     const db = await connection();
-    await db.collection('songs').drop();
+    let songsList = await songsData.getAll();
+    if (songsList.length !== 0) {
+        await db.collection('songs').drop();
+    }
+
+    let usersList = await usersData.getAll()
+    if (usersList.length > 0) {
+        await db.collection('users').drop()
+    }
     let song1 = await songsData.create(
         'You are loved',
         'Stars Go Dim',

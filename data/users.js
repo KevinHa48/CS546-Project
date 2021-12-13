@@ -1,4 +1,4 @@
-const {users} = require('../config/mongoCollection');
+const {users, industries} = require('../config/mongoCollection');
 const {getIndustry, getAllIndustries} = require('./industries');
 const {ObjectId} = require('mongodb');
 const axios = require('axios');
@@ -248,6 +248,9 @@ const getNumberOfShares = async (userId, stockId) => {
     const _userId = getObjectId(userId);
     const _stockId = getObjectId(stockId);
     const user = await getById(userId);
+    if (!user) {
+        throw 'Could not find user with id.'
+    }
     const industry = await getIndustry(stockId);
     const {transactions} = user.wallet;
     return transactions
@@ -263,20 +266,29 @@ const getAveragePrice = async (userId, stockId) => {
     const _userId = getObjectId(userId);
     const _stockId = getObjectId(stockId);
     const user = await getById(userId);
+    if (!user) {
+        throw 'No user found!'
+    }
+    const industry = await getIndustry(stockId)
     const totalShares = await getNumberOfShares(userId, stockId);
     let {transactions} = user.wallet;
-    transactions = transactions.filter(
-        (transaction) => transaction._itemId === stockId
-    );
+    // transactions = transactions.filter(
+        // (transaction) => (transaction._itemId === stockId && transaction.pos === 'buy')
+    // );
     if (totalShares === 0) {
         throw 'User does not own any of this stock.';
     }
-    let count = totalShares; // decrement as
+    let count = totalShares;
     let averagePrice = 0.0;
     for (let i = transactions.length - 1; i >= 0 && count > 0; --i) {
-        const {shares, price} = transactions[i];
-        averagePrice += (price * shares) / totalShares;
-        count -= shares;
+        if (transactions[i]._itemId === stockId && transactions[i].pos === 'buy') {
+            let {shares, price} = transactions[i];
+            if (shares > totalShares) {
+                shares = totalShares
+            }
+            averagePrice += (price * shares) / totalShares;
+            count -= shares;
+        }
     }
     return averagePrice;
 };
@@ -284,10 +296,12 @@ const getAveragePrice = async (userId, stockId) => {
 const calculatePortfolioValue = async (userId) => {
     const _userId = getObjectId(userId);
     let user = await getById(userId);
+    if (!user) {
+        throw 'Could not find user with that id.'
+    }
     const industries = await getAllIndustries();
     let value = 0.0;
-    let rets = [];
-    let amts = [];
+    let pnl = 0.0;
     for (const industry of industries) {
         const shares = await getNumberOfShares(userId, industry._id);
         if (shares === 0) {
@@ -295,12 +309,18 @@ const calculatePortfolioValue = async (userId) => {
         }
         const averagePrice = await getAveragePrice(userId, industry._id)
         value += shares * industry.lastPrice;
-        rets.push((industry.lastPrice - averagePrice) / averagePrice)
-        amts.push(shares * industry.lastPrice)
+        pnl += (industry.lastPrice - averagePrice) * shares
     }
     value += user.wallet.balance
+
+    for (const transaction of user.wallet.transactions) {
+        const today = (new Date()).toDateString()
+        if (transaction.pos !== 'sell' || transaction.datetime.toDateString() !== today) {
+            continue
+        }
+        pnl += transaction.pnl
+    }
     // Force to two decimal places, and do not round.
-    value = Math.trunc(value*100)/100;
     
     const date = new Date()
     const collection = await users()
@@ -309,16 +329,11 @@ const calculatePortfolioValue = async (userId) => {
         throw 'The portfolio value for the user is 0.'
     }
 
-    let ret = 0.0
-    for (let i = 0; i < rets.length; ++i) {
-        ret += rets[i] * amts[i] / value // weighted return of each stock holding
-    }
-    ret = Math.trunc(ret * 10000) / 100
-
+    let ret = Math.trunc(pnl / value * 10000) / 100
     const updateInfo = await collection.updateOne({_id: _userId}, {
         $push: {
             'wallet.portfolioValues': {
-                date: date.toDateString() + `${date.getHours()}:${date.getMinutes()}`, 
+                date: date.toDateString(), 
                 value: ret
             }
         }
@@ -362,6 +377,13 @@ const addStockTransaction = async (
     if (pos === 'sell' && (shares <= 0 || shares > oldShareAmount)) {
         throw 'User cannot sell that many shares.';
     }
+
+    let averagePrice
+    if (pos === 'sell') {
+        averagePrice = await getAveragePrice(userId, stockId) // i only need to calculate pnl on sells.
+    } else {
+        averagePrice = 0.0
+    }
     const transaction = {
         _id: new ObjectId(),
         datetime,
@@ -370,6 +392,7 @@ const addStockTransaction = async (
         price,
         shares,
         pos,
+        pnl: pos === 'sell' ? (price - averagePrice) * shares : 0.0 // if it is a buy transaction then no pnl.
     };
     const collection = await users();
     let updateInfo = await collection.updateOne(
@@ -394,7 +417,6 @@ const addStockTransaction = async (
             throw 'Failed to add stock to holdings array.'
         }
     } else if (newShareAmount === 0) {
-        console.log('sold out')
         updateInfo = await collection.updateOne(
             {_id: _userId},
             {$pull: {'wallet.holdings.stocks': stockId}}

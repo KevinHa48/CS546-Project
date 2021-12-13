@@ -4,7 +4,7 @@
   "description": "Final",
   "main": "app.js",
   "scripts": {
-    "seed": "node ./tasks/seed.js",
+    "seed": "node ./tasks/seed.js && node ./tasks/populateIndustry.js",
     "start": "node app.js"
   },
   "repository": {

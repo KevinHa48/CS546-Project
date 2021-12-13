@@ -81,7 +81,6 @@
 
         // Grab id of song you clicked sell on
         let song_id = $(this).attr('songId');
-        console.log(song_id);
 
         let confirm_yes = $('.confirm-yes');
         let confirm_no = $('.confirm-no');
@@ -90,9 +89,7 @@
 
         // Grab the button's parent in order to get the relevant song info for the modal.
         let song_cell = $(this).parent().siblings();
-        console.log(song_cell)
         let song_name = song_cell.find('.song-name').text();
-        console.log(song_name)
         let song_artist = song_cell.find('.artist').text();
 
         $('.modal-info').text(`Are you sure you want to sell 

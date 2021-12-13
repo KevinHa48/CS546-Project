@@ -31,7 +31,6 @@ const getSpotifyData = async(songObj) => {
                 'Authorization': `Bearer ${await getAccessToken()}`
             }
         });
-    console.log(response.data)
     songObj.image = response.data.tracks.items[0].album.images[1].url;
     return songObj;
 }
